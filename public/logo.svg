@@ -1,0 +1,7 @@
+<svg width="180" height="48" viewBox="0 0 180 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Logo placeholder para Casa Fabio - Reemplazar con logo real -->
+  <rect width="48" height="48" rx="8" fill="currentColor" opacity="0.1"/>
+  <path d="M24 12L34 18V30L24 36L14 30V18L24 12Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+  <circle cx="24" cy="24" r="4" fill="currentColor"/>
+  <text x="56" y="30" font-family="system-ui, sans-serif" font-size="20" font-weight="700" fill="currentColor">CASA FABIO</text>
+</svg>
