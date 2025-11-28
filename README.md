@@ -1,73 +1,172 @@
-# Welcome to your Lovable project
+# Casa Fabio - Sistema de Gestión de Pedidos
 
-## Project info
+Sistema de escritorio para distribuidora de autopartes desarrollado con React + TypeScript + Vite.
 
-**URL**: https://lovable.dev/projects/4ccf30d9-9529-4db6-baaf-17b987c8dab4
+## 🚀 Inicio Rápido
 
-## How can I edit this code?
+### Instalación y Ejecución
 
-There are several ways of editing your application.
+```bash
+# Instalar dependencias
+npm install
 
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/4ccf30d9-9529-4db6-baaf-17b987c8dab4) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Ejecutar en desarrollo
 npm run dev
+
+# Compilar para producción
+npm run build
 ```
 
-**Edit a file directly in GitHub**
+La aplicación estará disponible en `http://localhost:8080`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 🎨 Personalización
 
-**Use GitHub Codespaces**
+### Logo SVG
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Para reemplazar el logo de Casa Fabio:
 
-## What technologies are used for this project?
+1. Navegá a `public/logo.svg`
+2. Reemplazá el contenido con tu logo SVG personalizado
+3. El logo se muestra automáticamente en el header de la aplicación
 
-This project is built with:
+### Catálogo de Productos
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+#### Configurar URL del JSON
 
-## How can I deploy this project?
+Para conectar con tu servidor de catálogo:
 
-Simply open [Lovable](https://lovable.dev/projects/4ccf30d9-9529-4db6-baaf-17b987c8dab4) and click on Share -> Publish.
+1. Abrí `src/services/catalogService.ts`
+2. Modificá la constante `CATALOG_URL`:
 
-## Can I connect a custom domain to my Lovable project?
+```typescript
+const CATALOG_URL = 'https://tu-servidor.com/api/catalogo.json';
+```
 
-Yes, you can!
+3. Descomentá la línea en `src/components/Header.tsx`:
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+```typescript
+// Cambiar de:
+const productos = mockCatalog;
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+// A:
+const productos = await catalogService.fetchCatalogWithRetry();
+```
+
+#### Formato del JSON
+
+El servidor debe devolver un array de productos con esta estructura:
+
+```json
+[
+  {
+    "codigo": "FAR-001",
+    "descripcion": "Faro Delantero Derecho Universal LED",
+    "categoria": "Iluminación",
+    "subcategoria": "Faros",
+    "marca": "Osram",
+    "precioCosto": 15000,
+    "precioLista": 22500,
+    "imagenUrl": "https://..." // opcional
+  }
+]
+```
+
+## 📱 Funcionalidades
+
+### Catálogo
+- ✅ Búsqueda por código y descripción
+- ✅ Filtro por categoría
+- ✅ Vista de detalle completa con imagen
+- ✅ Actualización desde servidor
+
+### Pedidos
+- ✅ Gestión de pedidos con cliente y observaciones
+- ✅ Coeficiente global y específico por producto
+- ✅ Cálculo automático de precios y totales
+- ✅ Edición inline de items
+
+### Exportación
+- ✅ Envío por WhatsApp Web
+- ✅ Impresión / PDF (usando impresión del navegador)
+- ✅ Guardado en localStorage
+
+### Temas
+- ✅ Tema oscuro (por defecto)
+- ✅ Tema claro
+- ✅ Persistencia de preferencia
+
+## 🛠️ Tecnologías
+
+- **React 18** - Framework UI
+- **TypeScript** - Type safety
+- **Vite** - Build tool
+- **Zustand** - State management
+- **Tailwind CSS** - Estilos
+- **Shadcn/ui** - Componentes UI
+- **Lucide React** - Iconos
+
+## 📦 Empaquetado para Escritorio
+
+### Electron (Recomendado)
+
+```bash
+# Instalar Electron
+npm install --save-dev electron electron-builder
+
+# Configurar y empaquetar
+# (Seguir guías oficiales de Electron)
+```
+
+### Tauri (Alternativa ligera)
+
+```bash
+# Instalar Tauri CLI
+npm install --save-dev @tauri-apps/cli
+
+# Configurar y empaquetar
+# (Seguir guías oficiales de Tauri)
+```
+
+## 🎯 Estructura del Proyecto
+
+```
+src/
+├── components/          # Componentes React
+│   ├── ui/             # Componentes base (shadcn)
+│   ├── Header.tsx
+│   ├── ProductTable.tsx
+│   ├── ProductDetailPanel.tsx
+│   └── OrderSummary.tsx
+├── pages/              # Páginas
+│   └── Index.tsx
+├── services/           # Servicios (API, catálogo)
+│   └── catalogService.ts
+├── store/              # Estado global (Zustand)
+│   └── useAppStore.ts
+├── types/              # Tipos TypeScript
+│   └── index.ts
+├── utils/              # Utilidades
+│   ├── pricing.ts
+│   └── whatsapp.ts
+└── index.css           # Sistema de diseño
+```
+
+## 🎨 Sistema de Diseño
+
+Los colores y estilos están centralizados en:
+- `src/index.css` - Variables CSS (colores, sombras)
+- `tailwind.config.ts` - Configuración de Tailwind
+
+### Paleta de Colores
+
+- **Primario**: `#18202e` - Fondo oscuro principal
+- **Secundario**: `#fdfdfd` - Fondos claros
+- **Acento**: `#dc2626` - Rojo para CTAs y destacados
+
+## 📄 Licencia
+
+Desarrollado para Casa Fabio - Distribuidora de Autopartes
+
+---
+
+**Contacto**: [Tu información de contacto]
