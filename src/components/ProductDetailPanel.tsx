@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Package, Minus, Plus, Trash2 } from 'lucide-react';
+import { Package, Minus, Plus, Trash2, Eye, EyeOff } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
@@ -15,7 +15,8 @@ export function ProductDetailPanel() {
     pedidoActual, 
     agregarItemPedido,
     eliminarItemPedido,
-    mostrarCostos
+    mostrarCostos,
+    toggleMostrarCostos
   } = useAppStore();
 
   const [cantidad, setCantidad] = useState(1);
@@ -94,6 +95,19 @@ export function ProductDetailPanel() {
           </div>
         </div>
 
+        {/* Toggle costos */}
+        <div className="flex justify-end">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleMostrarCostos}
+            className="gap-2 text-xs"
+          >
+            {mostrarCostos ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+            {mostrarCostos ? 'Ocultar costos' : 'Mostrar costos'}
+          </Button>
+        </div>
+
         {/* Precios */}
         <div className="space-y-3 p-4 bg-card border border-border rounded-lg">
           {mostrarCostos && (
@@ -115,22 +129,22 @@ export function ProductDetailPanel() {
           </div>
         </div>
 
-        {/* Controles - Cantidad y Porcentaje en el mismo renglón */}
+        {/* Controles - Cantidad y Porcentaje compactos */}
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
             {/* Cantidad */}
             <div>
-              <Label htmlFor="cantidad" className="text-sm font-semibold mb-2 block">
+              <Label htmlFor="cantidad" className="text-xs font-semibold mb-1.5 block">
                 Cantidad
               </Label>
               <div className="flex items-center gap-1">
                 <Button
                   variant="outline"
                   size="icon"
-                  className="h-9 w-9"
+                  className="h-8 w-8"
                   onClick={() => setCantidad(Math.max(1, cantidad - 1))}
                 >
-                  <Minus className="h-4 w-4" />
+                  <Minus className="h-3 w-3" />
                 </Button>
                 <Input
                   id="cantidad"
@@ -138,26 +152,26 @@ export function ProductDetailPanel() {
                   min="1"
                   value={cantidad}
                   onChange={(e) => setCantidad(Math.max(1, parseInt(e.target.value) || 1))}
-                  className="text-center font-semibold h-9"
+                  className="text-center font-semibold h-8 w-14"
                 />
                 <Button
                   variant="outline"
                   size="icon"
-                  className="h-9 w-9"
+                  className="h-8 w-8"
                   onClick={() => setCantidad(cantidad + 1)}
                 >
-                  <Plus className="h-4 w-4" />
+                  <Plus className="h-3 w-3" />
                 </Button>
               </div>
             </div>
 
             {/* Porcentaje */}
             <div>
-              <Label htmlFor="porcentaje" className="text-sm font-semibold mb-2 block">
+              <Label htmlFor="porcentaje" className="text-xs font-semibold mb-1.5 block">
                 Ganancia
               </Label>
               <Select value={porcentaje.toString()} onValueChange={(v) => setPorcentaje(parseInt(v))}>
-                <SelectTrigger className="h-9">
+                <SelectTrigger className="h-8 w-20">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -180,25 +194,24 @@ export function ProductDetailPanel() {
           </div>
         </div>
 
-        {/* Botones de acción */}
-        <div className="space-y-2">
+        {/* Botones de acción - en la misma línea */}
+        <div className="flex gap-2">
           <Button
             onClick={handleAgregarOActualizar}
-            className="w-full bg-accent hover:bg-accent/90 text-accent-foreground shadow-glow-accent"
+            className="flex-1 bg-accent hover:bg-accent/90 text-accent-foreground shadow-glow-accent"
             size="lg"
           >
-            {itemEnPedido ? 'Actualizar en pedido' : 'Agregar al pedido'}
+            {itemEnPedido ? 'Actualizar' : 'Agregar'}
           </Button>
 
           {itemEnPedido && (
             <Button
               onClick={handleEliminar}
               variant="outline"
-              className="w-full"
               size="lg"
+              className="w-auto px-4"
             >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Quitar del pedido
+              <Trash2 className="h-4 w-4" />
             </Button>
           )}
         </div>
