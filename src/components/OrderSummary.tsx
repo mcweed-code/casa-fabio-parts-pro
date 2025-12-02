@@ -5,9 +5,7 @@ import {
   Save, 
   FileText, 
   Edit2,
-  X,
-  Eye,
-  EyeOff
+  X
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -28,7 +26,6 @@ export function OrderSummary() {
     vaciarPedido,
     guardarPedido,
     mostrarCostos,
-    toggleMostrarCostos,
   } = useAppStore();
 
   const { toast } = useToast();
@@ -89,17 +86,8 @@ export function OrderSummary() {
   return (
     <div className="flex flex-col h-full bg-card border-t border-border">
       {/* Header */}
-      <div className="p-4 border-b border-border bg-card/80 flex items-center justify-between">
+      <div className="p-4 border-b border-border bg-card/80">
         <h2 className="text-lg font-bold">Pedido Actual</h2>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={toggleMostrarCostos}
-          className="gap-2"
-        >
-          {mostrarCostos ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-          {mostrarCostos ? 'Ocultar costos' : 'Mostrar costos'}
-        </Button>
       </div>
 
       {/* Items del pedido */}

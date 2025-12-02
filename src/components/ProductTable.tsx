@@ -1,24 +1,29 @@
 import { useState, useMemo } from 'react';
-import { Search, Download } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 import { Input } from './ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Button } from './ui/button';
 import { useAppStore } from '@/store/useAppStore';
 import { formatearPrecio } from '@/utils/pricing';
-import { generarCSVProductos, descargarCSV } from '@/utils/exportacion';
 import { cn } from '@/lib/utils';
-import { useToast } from '@/hooks/use-toast';
 
 const ITEMS_PER_PAGE = 50;
 
 export function ProductTable() {
   const { productos, productoSeleccionado, setProductoSeleccionado } = useAppStore();
-  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('Todas');
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>('Todas');
   const [selectedMarca, setSelectedMarca] = useState<string>('Todas');
   const [currentPage, setCurrentPage] = useState(1);
+
+  const handleLimpiarFiltros = () => {
+    setSearchTerm('');
+    setSelectedCategory('Todas');
+    setSelectedSubcategory('Todas');
+    setSelectedMarca('Todas');
+    setCurrentPage(1);
+  };
 
   // Obtener categorías, subcategorías y marcas únicas
   const categorias = useMemo(() => {
@@ -70,28 +75,28 @@ export function ProductTable() {
     setCurrentPage(1);
   }, [searchTerm, selectedCategory, selectedSubcategory, selectedMarca]);
 
-  const handleExportarCSV = () => {
-    const csv = generarCSVProductos(productos);
-    const fecha = new Date().toISOString().split('T')[0];
-    descargarCSV(csv, `lista-precios-casa-fabio-${fecha}.csv`);
-    toast({
-      title: 'Lista exportada',
-      description: 'La lista de precios se descargó correctamente.',
-    });
-  };
-
   return (
     <div className="flex flex-col h-full">
       {/* Filtros */}
       <div className="p-4 space-y-3 border-b border-border bg-card/50">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Buscar por código o descripción..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar por código o descripción..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={handleLimpiarFiltros}
+            title="Limpiar búsqueda"
+          >
+            <X className="h-4 w-4" />
+          </Button>
         </div>
 
         <div className="grid grid-cols-3 gap-2">
@@ -137,16 +142,6 @@ export function ProductTable() {
             </SelectContent>
           </Select>
         </div>
-
-        <Button
-          onClick={handleExportarCSV}
-          variant="outline"
-          size="sm"
-          className="w-full"
-        >
-          <Download className="h-4 w-4 mr-2" />
-          Exportar lista de precios (CSV)
-        </Button>
       </div>
 
       {/* Tabla */}
