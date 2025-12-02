@@ -4,31 +4,31 @@ import {
   Send, 
   Save, 
   FileText, 
-  User, 
-  MessageSquare,
   Edit2,
-  X
+  X,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
-import { Textarea } from './ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { useAppStore } from '@/store/useAppStore';
 import { formatearPrecio } from '@/utils/pricing';
 import { enviarPorWhatsApp } from '@/utils/whatsapp';
 import { useToast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
+
+const PORCENTAJES_DISPONIBLES = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100];
 
 export function OrderSummary() {
   const {
     pedidoActual,
-    actualizarClientePedido,
-    actualizarObservacionesPedido,
-    actualizarCoeficienteGlobal,
     actualizarItemPedido,
     eliminarItemPedido,
     vaciarPedido,
     guardarPedido,
+    mostrarCostos,
+    toggleMostrarCostos,
   } = useAppStore();
 
   const { toast } = useToast();
@@ -87,55 +87,19 @@ export function OrderSummary() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-card border-l border-border">
+    <div className="flex flex-col h-full bg-card border-t border-border">
       {/* Header */}
-      <div className="p-4 border-b border-border bg-card/80">
+      <div className="p-4 border-b border-border bg-card/80 flex items-center justify-between">
         <h2 className="text-lg font-bold">Pedido Actual</h2>
-      </div>
-
-      {/* Info del pedido */}
-      <div className="p-4 space-y-4 border-b border-border">
-        <div>
-          <Label htmlFor="cliente" className="text-xs font-semibold mb-1 flex items-center gap-2">
-            <User className="h-3 w-3" />
-            Cliente
-          </Label>
-          <Input
-            id="cliente"
-            placeholder="Nombre del cliente"
-            value={pedidoActual.clienteNombre}
-            onChange={(e) => actualizarClientePedido(e.target.value)}
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="observaciones" className="text-xs font-semibold mb-1 flex items-center gap-2">
-            <MessageSquare className="h-3 w-3" />
-            Observaciones
-          </Label>
-          <Textarea
-            id="observaciones"
-            placeholder="Observaciones adicionales"
-            value={pedidoActual.observaciones}
-            onChange={(e) => actualizarObservacionesPedido(e.target.value)}
-            rows={2}
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="coeficiente-global" className="text-xs font-semibold mb-1">
-            Coeficiente Global
-          </Label>
-          <Input
-            id="coeficiente-global"
-            type="number"
-            step="0.01"
-            min="0"
-            value={pedidoActual.coeficienteGlobal}
-            onChange={(e) => actualizarCoeficienteGlobal(parseFloat(e.target.value) || 0)}
-            className="font-semibold"
-          />
-        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={toggleMostrarCostos}
+          className="gap-2"
+        >
+          {mostrarCostos ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          {mostrarCostos ? 'Ocultar costos' : 'Mostrar costos'}
+        </Button>
       </div>
 
       {/* Items del pedido */}
@@ -161,6 +125,11 @@ export function OrderSummary() {
                   <p className="text-sm font-medium truncate">
                     {item.producto.descripcion}
                   </p>
+                  {mostrarCostos && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Costo: {formatearPrecio(item.producto.precioCosto)}
+                    </p>
+                  )}
                 </div>
                 <Button
                   variant="ghost"
@@ -185,27 +154,35 @@ export function OrderSummary() {
                           actualizarItemPedido(
                             item.producto.codigo,
                             parseInt(e.target.value) || 1,
-                            item.coeficiente
+                            item.coeficientePorcentaje
                           )
                         }
                         className="h-8 text-sm"
                       />
                     </div>
                     <div>
-                      <Label className="text-xs">Coeficiente</Label>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        value={item.coeficiente}
-                        onChange={(e) =>
+                      <Label className="text-xs">Ganancia</Label>
+                      <Select 
+                        value={item.coeficientePorcentaje.toString()} 
+                        onValueChange={(v) =>
                           actualizarItemPedido(
                             item.producto.codigo,
                             item.cantidad,
-                            parseFloat(e.target.value) || 0
+                            parseInt(v)
                           )
                         }
-                        className="h-8 text-sm"
-                      />
+                      >
+                        <SelectTrigger className="h-8">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {PORCENTAJES_DISPONIBLES.map((p) => (
+                            <SelectItem key={p} value={p.toString()}>
+                              {p}%
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                   <Button
@@ -221,7 +198,7 @@ export function OrderSummary() {
                 <div className="flex items-end justify-between pt-2 border-t border-border/50">
                   <div className="text-xs text-muted-foreground space-y-0.5">
                     <p>Cant: {item.cantidad} × {formatearPrecio(item.precioUnitarioFinal)}</p>
-                    <p>Coef: {item.coeficiente.toFixed(2)}</p>
+                    <p>Ganancia: {item.coeficientePorcentaje}%</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <Button

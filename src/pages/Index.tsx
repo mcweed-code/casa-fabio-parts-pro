@@ -4,12 +4,14 @@ import { ProductTable } from '@/components/ProductTable';
 import { ProductDetailPanel } from '@/components/ProductDetailPanel';
 import { OrderSummary } from '@/components/OrderSummary';
 import { useAppStore } from '@/store/useAppStore';
-import { mockCatalog } from '@/services/catalogService';
+import { mockCatalog, catalogService } from '@/services/catalogService';
+
+const AUTO_REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutos
 
 const Index = () => {
-  const { productos, setCatalogo, theme } = useAppStore();
+  const { productos, setCatalogo, theme, setCatalogoLoading } = useAppStore();
 
-  // Cargar catálogo inicial y aplicar tema
+  // Cargar catálogo inicial, aplicar tema y configurar auto-refresh
   useEffect(() => {
     // Aplicar tema inicial
     document.documentElement.classList.toggle('dark', theme === 'dark');
@@ -18,26 +20,45 @@ const Index = () => {
     if (productos.length === 0) {
       setCatalogo(mockCatalog);
     }
-  }, [theme, productos.length, setCatalogo]);
+
+    // Auto-refresh del catálogo cada 5 minutos
+    const interval = setInterval(async () => {
+      try {
+        setCatalogoLoading(true);
+        // En producción, usar: const productos = await catalogService.fetchCatalogWithRetry();
+        const productos = mockCatalog;
+        setCatalogo(productos);
+      } catch (error) {
+        console.error('Error al actualizar catálogo automáticamente', error);
+      } finally {
+        setCatalogoLoading(false);
+      }
+    }, AUTO_REFRESH_INTERVAL);
+
+    return () => clearInterval(interval);
+  }, [theme, productos.length, setCatalogo, setCatalogoLoading]);
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
       
-      {/* Layout principal: 3 columnas */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Columna 1: Tabla de productos */}
-        <div className="w-[40%] border-r border-border">
-          <ProductTable />
+      {/* Layout dividido: arriba catálogo, abajo pedido */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Parte superior: Catálogo (tabla y detalle) */}
+        <div className="h-[60%] flex border-b border-border">
+          {/* Tabla de productos */}
+          <div className="w-[50%] border-r border-border">
+            <ProductTable />
+          </div>
+
+          {/* Panel de detalle */}
+          <div className="w-[50%]">
+            <ProductDetailPanel />
+          </div>
         </div>
 
-        {/* Columna 2: Panel de detalle (FIJO) */}
-        <div className="w-[35%] border-r border-border">
-          <ProductDetailPanel />
-        </div>
-
-        {/* Columna 3: Resumen del pedido */}
-        <div className="w-[25%]">
+        {/* Parte inferior: Pedido actual */}
+        <div className="h-[40%]">
           <OrderSummary />
         </div>
       </div>
@@ -76,11 +97,7 @@ const Index = () => {
           </div>
 
           <div className="mb-6 p-4 bg-muted/20 rounded">
-            <p><strong>Cliente:</strong> {useAppStore.getState().pedidoActual.clienteNombre || 'Sin especificar'}</p>
-            {useAppStore.getState().pedidoActual.observaciones && (
-              <p className="mt-2"><strong>Observaciones:</strong> {useAppStore.getState().pedidoActual.observaciones}</p>
-            )}
-            <p className="mt-2"><strong>Coeficiente:</strong> {useAppStore.getState().pedidoActual.coeficienteGlobal.toFixed(2)}</p>
+            <p><strong>Fecha:</strong> {new Date().toLocaleDateString('es-AR')}</p>
           </div>
 
           <table className="w-full border-collapse mb-6">

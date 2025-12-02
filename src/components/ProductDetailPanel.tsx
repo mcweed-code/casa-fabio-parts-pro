@@ -1,27 +1,25 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Package, Minus, Plus, Trash2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { useAppStore } from '@/store/useAppStore';
 import { formatearPrecio, calcularPrecioFinal, calcularSubtotal } from '@/utils/pricing';
-import { cn } from '@/lib/utils';
+
+const PORCENTAJES_DISPONIBLES = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100];
 
 export function ProductDetailPanel() {
   const { 
     productoSeleccionado, 
     pedidoActual, 
     agregarItemPedido,
-    eliminarItemPedido 
+    eliminarItemPedido,
+    mostrarCostos
   } = useAppStore();
 
   const [cantidad, setCantidad] = useState(1);
-  const [coeficiente, setCoeficiente] = useState(pedidoActual.coeficienteGlobal);
-
-  // Actualizar coeficiente cuando cambia el global
-  useEffect(() => {
-    setCoeficiente(pedidoActual.coeficienteGlobal);
-  }, [pedidoActual.coeficienteGlobal]);
+  const [porcentaje, setPorcentaje] = useState(25);
 
   // Verificar si el producto está en el pedido
   const itemEnPedido = productoSeleccionado
@@ -30,13 +28,13 @@ export function ProductDetailPanel() {
 
   // Calcular precio final y subtotal
   const precioFinal = productoSeleccionado
-    ? calcularPrecioFinal(productoSeleccionado.precioLista, coeficiente)
+    ? calcularPrecioFinal(productoSeleccionado.precioLista, porcentaje)
     : 0;
   const subtotal = calcularSubtotal(precioFinal, cantidad);
 
   const handleAgregarOActualizar = () => {
     if (!productoSeleccionado) return;
-    agregarItemPedido(productoSeleccionado, cantidad, coeficiente);
+    agregarItemPedido(productoSeleccionado, cantidad, porcentaje);
   };
 
   const handleEliminar = () => {
@@ -98,71 +96,79 @@ export function ProductDetailPanel() {
 
         {/* Precios */}
         <div className="space-y-3 p-4 bg-card border border-border rounded-lg">
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground">Precio costo</span>
-            <span className="font-medium">{formatearPrecio(productoSeleccionado.precioCosto)}</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground">Precio lista</span>
-            <span className="font-medium">{formatearPrecio(productoSeleccionado.precioLista)}</span>
-          </div>
-          <div className="h-px bg-border" />
+          {mostrarCostos && (
+            <>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Precio costo</span>
+                <span className="font-medium">{formatearPrecio(productoSeleccionado.precioCosto)}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Precio lista</span>
+                <span className="font-medium">{formatearPrecio(productoSeleccionado.precioLista)}</span>
+              </div>
+              <div className="h-px bg-border" />
+            </>
+          )}
           <div className="flex justify-between items-center">
             <span className="text-sm font-semibold">Precio final</span>
             <span className="text-lg font-bold text-accent">{formatearPrecio(precioFinal)}</span>
           </div>
         </div>
 
-        {/* Controles */}
+        {/* Controles - Cantidad y Porcentaje en el mismo renglón */}
         <div className="space-y-4">
-          {/* Cantidad */}
-          <div>
-            <Label htmlFor="cantidad" className="text-sm font-semibold mb-2 block">
-              Cantidad
-            </Label>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setCantidad(Math.max(1, cantidad - 1))}
-              >
-                <Minus className="h-4 w-4" />
-              </Button>
-              <Input
-                id="cantidad"
-                type="number"
-                min="1"
-                value={cantidad}
-                onChange={(e) => setCantidad(Math.max(1, parseInt(e.target.value) || 1))}
-                className="text-center font-semibold"
-              />
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setCantidad(cantidad + 1)}
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
+          <div className="grid grid-cols-2 gap-3">
+            {/* Cantidad */}
+            <div>
+              <Label htmlFor="cantidad" className="text-sm font-semibold mb-2 block">
+                Cantidad
+              </Label>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-9 w-9"
+                  onClick={() => setCantidad(Math.max(1, cantidad - 1))}
+                >
+                  <Minus className="h-4 w-4" />
+                </Button>
+                <Input
+                  id="cantidad"
+                  type="number"
+                  min="1"
+                  value={cantidad}
+                  onChange={(e) => setCantidad(Math.max(1, parseInt(e.target.value) || 1))}
+                  className="text-center font-semibold h-9"
+                />
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-9 w-9"
+                  onClick={() => setCantidad(cantidad + 1)}
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
-          </div>
 
-          {/* Coeficiente */}
-          <div>
-            <Label htmlFor="coeficiente" className="text-sm font-semibold mb-2 block">
-              Coeficiente
-            </Label>
-            <Input
-              id="coeficiente"
-              type="number"
-              step="0.01"
-              min="0"
-              value={coeficiente}
-              onChange={(e) => setCoeficiente(parseFloat(e.target.value) || 0)}
-              className="font-semibold"
-            />
-            <p className="text-xs text-muted-foreground mt-1">
-              Global del pedido: {pedidoActual.coeficienteGlobal.toFixed(2)}
-            </p>
+            {/* Porcentaje */}
+            <div>
+              <Label htmlFor="porcentaje" className="text-sm font-semibold mb-2 block">
+                Ganancia
+              </Label>
+              <Select value={porcentaje.toString()} onValueChange={(v) => setPorcentaje(parseInt(v))}>
+                <SelectTrigger className="h-9">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PORCENTAJES_DISPONIBLES.map((p) => (
+                    <SelectItem key={p} value={p.toString()}>
+                      {p}%
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {/* Subtotal */}
