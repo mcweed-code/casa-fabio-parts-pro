@@ -3,13 +3,13 @@
  */
 
 /**
- * Calcula el precio final aplicando un coeficiente al precio base
+ * Calcula el precio final aplicando un porcentaje de ganancia al precio base
  * @param precioBase - Precio de lista del producto
- * @param coeficiente - Multiplicador a aplicar
+ * @param porcentaje - Porcentaje a aplicar (ej: 25 para 25%, 50 para 50%)
  * @returns Precio final calculado
  */
-export function calcularPrecioFinal(precioBase: number, coeficiente: number): number {
-  return precioBase * coeficiente;
+export function calcularPrecioFinal(precioBase: number, porcentaje: number): number {
+  return precioBase * (1 + porcentaje / 100);
 }
 
 /**

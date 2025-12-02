@@ -11,14 +11,7 @@ export function generarTextoWhatsApp(pedido: Pedido): string {
   
   let texto = `*PEDIDO - CASA FABIO*\n`;
   texto += `━━━━━━━━━━━━━━━━━━\n\n`;
-  texto += `*Cliente:* ${pedido.clienteNombre || 'Sin especificar'}\n`;
-  texto += `*Fecha:* ${fecha}\n`;
-  
-  if (pedido.observaciones) {
-    texto += `*Observaciones:* ${pedido.observaciones}\n`;
-  }
-  
-  texto += `*Coeficiente:* ${pedido.coeficienteGlobal.toFixed(2)}\n\n`;
+  texto += `*Fecha:* ${fecha}\n\n`;
   texto += `*DETALLE DEL PEDIDO*\n`;
   texto += `━━━━━━━━━━━━━━━━━━\n\n`;
 
@@ -26,7 +19,7 @@ export function generarTextoWhatsApp(pedido: Pedido): string {
     texto += `${index + 1}. *${item.producto.codigo}*\n`;
     texto += `   ${item.producto.descripcion}\n`;
     texto += `   Cant: ${item.cantidad} | `;
-    texto += `Coef: ${item.coeficiente.toFixed(2)} | `;
+    texto += `Ganancia: ${item.coeficientePorcentaje}% | `;
     texto += `P.Unit: ${formatearPrecio(item.precioUnitarioFinal)}\n`;
     texto += `   *Subtotal: ${formatearPrecio(item.subtotal)}*\n\n`;
   });

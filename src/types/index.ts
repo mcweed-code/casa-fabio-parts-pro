@@ -16,16 +16,13 @@ export interface Producto {
 export interface ItemPedido {
   producto: Producto;
   cantidad: number;
-  coeficiente: number;
+  coeficientePorcentaje: number; // 25, 50, 75, etc. (sin el %)
   precioUnitarioFinal: number;
   subtotal: number;
 }
 
 export interface Pedido {
   id: string;
-  clienteNombre: string;
-  observaciones: string;
-  coeficienteGlobal: number;
   items: ItemPedido[];
   total: number;
   fecha: string;

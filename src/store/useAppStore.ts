@@ -20,11 +20,10 @@ interface AppState {
 
   // Pedido actual
   pedidoActual: Pedido;
-  actualizarClientePedido: (clienteNombre: string) => void;
-  actualizarObservacionesPedido: (observaciones: string) => void;
-  actualizarCoeficienteGlobal: (coeficiente: number) => void;
-  agregarItemPedido: (producto: Producto, cantidad: number, coeficiente?: number) => void;
-  actualizarItemPedido: (codigoProducto: string, cantidad: number, coeficiente: number) => void;
+  mostrarCostos: boolean;
+  toggleMostrarCostos: () => void;
+  agregarItemPedido: (producto: Producto, cantidad: number, porcentaje: number) => void;
+  actualizarItemPedido: (codigoProducto: string, cantidad: number, porcentaje: number) => void;
   eliminarItemPedido: (codigoProducto: string) => void;
   vaciarPedido: () => void;
   calcularTotalPedido: () => void;
@@ -39,9 +38,6 @@ interface AppState {
 
 const crearPedidoVacio = (): Pedido => ({
   id: crypto.randomUUID(),
-  clienteNombre: '',
-  observaciones: '',
-  coeficienteGlobal: 1.0,
   items: [],
   total: 0,
   fecha: new Date().toISOString(),
@@ -58,6 +54,7 @@ export const useAppStore = create<AppState>()(
       catalogoError: null,
       pedidoActual: crearPedidoVacio(),
       pedidosGuardados: [],
+      mostrarCostos: true,
 
       // Tema
       toggleTheme: () => {
@@ -78,53 +75,11 @@ export const useAppStore = create<AppState>()(
       setCatalogoError: (error) => set({ catalogoError: error }),
 
       // Pedido
-      actualizarClientePedido: (clienteNombre) =>
-        set((state) => ({
-          pedidoActual: { ...state.pedidoActual, clienteNombre },
-        })),
+      toggleMostrarCostos: () => set((state) => ({ mostrarCostos: !state.mostrarCostos })),
 
-      actualizarObservacionesPedido: (observaciones) =>
-        set((state) => ({
-          pedidoActual: { ...state.pedidoActual, observaciones },
-        })),
-
-      actualizarCoeficienteGlobal: (coeficiente) => {
-        set((state) => {
-          // Actualizar items que usen coeficiente global
-          const itemsActualizados = state.pedidoActual.items.map((item) => {
-            // Solo actualizar si el ítem usa el coeficiente global (igual al anterior global)
-            if (item.coeficiente === state.pedidoActual.coeficienteGlobal) {
-              const precioUnitarioFinal = calcularPrecioFinal(
-                item.producto.precioLista,
-                coeficiente
-              );
-              return {
-                ...item,
-                coeficiente,
-                precioUnitarioFinal,
-                subtotal: calcularSubtotal(precioUnitarioFinal, item.cantidad),
-              };
-            }
-            return item;
-          });
-
-          const total = itemsActualizados.reduce((sum, item) => sum + item.subtotal, 0);
-
-          return {
-            pedidoActual: {
-              ...state.pedidoActual,
-              coeficienteGlobal: coeficiente,
-              items: itemsActualizados,
-              total,
-            },
-          };
-        });
-      },
-
-      agregarItemPedido: (producto, cantidad, coeficiente) => {
+      agregarItemPedido: (producto, cantidad, porcentaje) => {
         const state = get();
-        const coeficienteAUsar = coeficiente ?? state.pedidoActual.coeficienteGlobal;
-        const precioUnitarioFinal = calcularPrecioFinal(producto.precioLista, coeficienteAUsar);
+        const precioUnitarioFinal = calcularPrecioFinal(producto.precioLista, porcentaje);
         const subtotal = calcularSubtotal(precioUnitarioFinal, cantidad);
 
         const itemExistente = state.pedidoActual.items.find(
@@ -140,7 +95,7 @@ export const useAppStore = create<AppState>()(
               ? {
                   ...item,
                   cantidad,
-                  coeficiente: coeficienteAUsar,
+                  coeficientePorcentaje: porcentaje,
                   precioUnitarioFinal,
                   subtotal,
                 }
@@ -151,7 +106,7 @@ export const useAppStore = create<AppState>()(
           const nuevoItem: ItemPedido = {
             producto,
             cantidad,
-            coeficiente: coeficienteAUsar,
+            coeficientePorcentaje: porcentaje,
             precioUnitarioFinal,
             subtotal,
           };
@@ -169,19 +124,19 @@ export const useAppStore = create<AppState>()(
         });
       },
 
-      actualizarItemPedido: (codigoProducto, cantidad, coeficiente) => {
+      actualizarItemPedido: (codigoProducto, cantidad, porcentaje) => {
         set((state) => {
           const itemsActualizados = state.pedidoActual.items.map((item) => {
             if (item.producto.codigo === codigoProducto) {
               const precioUnitarioFinal = calcularPrecioFinal(
                 item.producto.precioLista,
-                coeficiente
+                porcentaje
               );
               const subtotal = calcularSubtotal(precioUnitarioFinal, cantidad);
               return {
                 ...item,
                 cantidad,
-                coeficiente,
+                coeficientePorcentaje: porcentaje,
                 precioUnitarioFinal,
                 subtotal,
               };
@@ -257,7 +212,6 @@ export const useAppStore = create<AppState>()(
             ...pedido,
             id: crypto.randomUUID(),
             fecha: new Date().toISOString(),
-            clienteNombre: `${pedido.clienteNombre} (Copia)`,
           };
           set({ pedidoActual: nuevoPedido });
         }

@@ -1,21 +1,42 @@
 import { useState, useMemo } from 'react';
-import { Search } from 'lucide-react';
+import { Search, Download } from 'lucide-react';
 import { Input } from './ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { Button } from './ui/button';
 import { useAppStore } from '@/store/useAppStore';
-import { Categoria } from '@/types';
 import { formatearPrecio } from '@/utils/pricing';
+import { generarCSVProductos, descargarCSV } from '@/utils/exportacion';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
+
+const ITEMS_PER_PAGE = 50;
 
 export function ProductTable() {
   const { productos, productoSeleccionado, setProductoSeleccionado } = useAppStore();
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<Categoria>('Todas');
+  const [selectedCategory, setSelectedCategory] = useState<string>('Todas');
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string>('Todas');
+  const [selectedMarca, setSelectedMarca] = useState<string>('Todas');
+  const [currentPage, setCurrentPage] = useState(1);
 
-  // Obtener categorías únicas
+  // Obtener categorías, subcategorías y marcas únicas
   const categorias = useMemo(() => {
     const cats = new Set(productos.map((p) => p.categoria));
     return ['Todas', ...Array.from(cats)];
+  }, [productos]);
+
+  const subcategorias = useMemo(() => {
+    const filtered = selectedCategory === 'Todas' 
+      ? productos 
+      : productos.filter(p => p.categoria === selectedCategory);
+    const subs = new Set(filtered.map((p) => p.subcategoria));
+    return ['Todas', ...Array.from(subs)];
+  }, [productos, selectedCategory]);
+
+  const marcas = useMemo(() => {
+    const marks = new Set(productos.map((p) => p.marca));
+    return ['Todas', ...Array.from(marks)];
   }, [productos]);
 
   // Filtrar productos
@@ -28,9 +49,36 @@ export function ProductTable() {
       const matchCategory =
         selectedCategory === 'Todas' || producto.categoria === selectedCategory;
 
-      return matchSearch && matchCategory;
+      const matchSubcategory =
+        selectedSubcategory === 'Todas' || producto.subcategoria === selectedSubcategory;
+
+      const matchMarca =
+        selectedMarca === 'Todas' || producto.marca === selectedMarca;
+
+      return matchSearch && matchCategory && matchSubcategory && matchMarca;
     });
-  }, [productos, searchTerm, selectedCategory]);
+  }, [productos, searchTerm, selectedCategory, selectedSubcategory, selectedMarca]);
+
+  // Paginación
+  const totalPages = Math.ceil(productosFiltrados.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const productosPaginados = productosFiltrados.slice(startIndex, endIndex);
+
+  // Reset página cuando cambian filtros
+  useMemo(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedCategory, selectedSubcategory, selectedMarca]);
+
+  const handleExportarCSV = () => {
+    const csv = generarCSVProductos(productos);
+    const fecha = new Date().toISOString().split('T')[0];
+    descargarCSV(csv, `lista-precios-casa-fabio-${fecha}.csv`);
+    toast({
+      title: 'Lista exportada',
+      description: 'La lista de precios se descargó correctamente.',
+    });
+  };
 
   return (
     <div className="flex flex-col h-full">
@@ -46,18 +94,59 @@ export function ProductTable() {
           />
         </div>
 
-        <Select value={selectedCategory} onValueChange={(value) => setSelectedCategory(value as Categoria)}>
-          <SelectTrigger>
-            <SelectValue placeholder="Categoría" />
-          </SelectTrigger>
-          <SelectContent>
-            {categorias.map((cat) => (
-              <SelectItem key={cat} value={cat}>
-                {cat}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="grid grid-cols-3 gap-2">
+          <Select value={selectedCategory} onValueChange={(value) => {
+            setSelectedCategory(value);
+            setSelectedSubcategory('Todas');
+          }}>
+            <SelectTrigger>
+              <SelectValue placeholder="Categoría" />
+            </SelectTrigger>
+            <SelectContent>
+              {categorias.map((cat) => (
+                <SelectItem key={cat} value={cat}>
+                  {cat}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={selectedSubcategory} onValueChange={setSelectedSubcategory}>
+            <SelectTrigger>
+              <SelectValue placeholder="Subcategoría" />
+            </SelectTrigger>
+            <SelectContent>
+              {subcategorias.map((sub) => (
+                <SelectItem key={sub} value={sub}>
+                  {sub}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={selectedMarca} onValueChange={setSelectedMarca}>
+            <SelectTrigger>
+              <SelectValue placeholder="Marca" />
+            </SelectTrigger>
+            <SelectContent>
+              {marcas.map((marca) => (
+                <SelectItem key={marca} value={marca}>
+                  {marca}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <Button
+          onClick={handleExportarCSV}
+          variant="outline"
+          size="sm"
+          className="w-full"
+        >
+          <Download className="h-4 w-4 mr-2" />
+          Exportar lista de precios (CSV)
+        </Button>
       </div>
 
       {/* Tabla */}
@@ -76,7 +165,7 @@ export function ProductTable() {
               </tr>
             </thead>
             <tbody>
-              {productosFiltrados.map((producto) => {
+              {productosPaginados.map((producto) => {
                 const isSelected = productoSeleccionado?.codigo === producto.codigo;
                 return (
                   <tr
@@ -106,9 +195,35 @@ export function ProductTable() {
         )}
       </div>
 
-      {/* Footer con conteo */}
-      <div className="px-4 py-2 border-t border-border bg-card/50 text-sm text-muted-foreground">
-        Mostrando {productosFiltrados.length} de {productos.length} productos
+      {/* Paginación y contador */}
+      <div className="px-4 py-3 border-t border-border bg-card/50 flex items-center justify-between">
+        <div className="text-sm text-muted-foreground">
+          Mostrando {startIndex + 1}-{Math.min(endIndex, productosFiltrados.length)} de {productosFiltrados.length} productos
+        </div>
+        
+        {totalPages > 1 && (
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+            >
+              Anterior
+            </Button>
+            <span className="text-sm">
+              Página {currentPage} de {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+            >
+              Siguiente
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

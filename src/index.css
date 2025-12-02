@@ -8,11 +8,11 @@
 
 @layer base {
   :root {
-    /* Light theme (tema claro) */
-    --background: 0 0% 99%;
+    /* Light theme (tema claro - más gris para no encandilar) */
+    --background: 220 13% 91%;
     --foreground: 216 28% 12%;
 
-    --card: 0 0% 100%;
+    --card: 220 13% 95%;
     --card-foreground: 216 28% 12%;
 
     --popover: 0 0% 100%;
