@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 const ITEMS_PER_PAGE = 50;
 
 export function ProductTable() {
-  const { productos, productoSeleccionado, setProductoSeleccionado } = useAppStore();
+  const { productos, productoSeleccionado, setProductoSeleccionado, mostrarCostos } = useAppStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('Todas');
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>('Todas');
@@ -156,12 +156,17 @@ export function ProductTable() {
               <tr>
                 <th className="text-left px-4 py-3 font-semibold text-sm">Código</th>
                 <th className="text-left px-4 py-3 font-semibold text-sm">Descripción</th>
-                <th className="text-right px-4 py-3 font-semibold text-sm">Precio</th>
+                <th className="text-left px-4 py-3 font-semibold text-sm">Marca</th>
+                <th className="text-right px-4 py-3 font-semibold text-sm">
+                  {mostrarCostos ? 'P. Distribuidor' : 'Precio Lista'}
+                </th>
               </tr>
             </thead>
             <tbody>
               {productosPaginados.map((producto) => {
                 const isSelected = productoSeleccionado?.codigo === producto.codigo;
+                // Cuando oculta costos, mostrar precioLista; cuando muestra costos, mostrar precioCosto
+                const precioMostrar = mostrarCostos ? producto.precioCosto : producto.precioLista;
                 return (
                   <tr
                     key={producto.codigo}
@@ -179,8 +184,11 @@ export function ProductTable() {
                     <td className="px-4 py-3 text-sm">
                       {producto.descripcion}
                     </td>
+                    <td className="px-4 py-3 text-sm text-muted-foreground">
+                      {producto.marca}
+                    </td>
                     <td className="px-4 py-3 text-sm text-right font-medium">
-                      {formatearPrecio(producto.precioLista)}
+                      {formatearPrecio(precioMostrar)}
                     </td>
                   </tr>
                 );
