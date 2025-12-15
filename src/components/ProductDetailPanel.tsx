@@ -27,14 +27,15 @@ export function ProductDetailPanel() {
     ? pedidoActual.items.find((item) => item.producto.codigo === productoSeleccionado.codigo)
     : null;
 
-  // Calcular precio final y subtotal
-  const precioFinal = productoSeleccionado
-    ? calcularPrecioFinal(productoSeleccionado.precioLista, porcentaje)
-    : 0;
-  const subtotal = calcularSubtotal(precioFinal, cantidad);
+  // Precio de lista = precio distribuidor + porcentaje de ganancia
+  // El precio distribuidor (precioCosto) es la base, el precioLista se calcula
+  const precioDistribuidor = productoSeleccionado?.precioCosto || 0;
+  const precioLista = calcularPrecioFinal(precioDistribuidor, porcentaje);
+  const subtotal = calcularSubtotal(precioLista, cantidad);
 
   const handleAgregarOActualizar = () => {
     if (!productoSeleccionado) return;
+    // Al agregar al pedido, se suma el precio de costo (distribuidor)
     agregarItemPedido(productoSeleccionado, cantidad, porcentaje);
   };
 
@@ -69,128 +70,120 @@ export function ProductDetailPanel() {
       </div>
 
       {/* Contenido */}
-      <div className="flex-1 p-6 space-y-6">
+      <div className="flex-1 p-4 space-y-4">
         {/* Info básica */}
         <div>
-          <div className="inline-block px-3 py-1 bg-accent/10 text-accent text-xs font-semibold rounded-full mb-3">
+          <div className="inline-block px-3 py-1 bg-accent/10 text-accent text-xs font-semibold rounded-full mb-2">
             {productoSeleccionado.categoria}
           </div>
-          <h2 className="text-2xl font-bold mb-2">
+          <h2 className="text-xl font-bold mb-1">
             {productoSeleccionado.descripcion}
           </h2>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             Código: <span className="font-mono font-medium text-foreground">{productoSeleccionado.codigo}</span>
           </p>
         </div>
 
         {/* Detalles técnicos */}
-        <div className="grid grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
+        <div className="grid grid-cols-2 gap-3 p-3 bg-muted/50 rounded-lg">
           <div>
             <p className="text-xs text-muted-foreground mb-1">Marca</p>
-            <p className="font-medium">{productoSeleccionado.marca}</p>
+            <p className="font-medium text-sm">{productoSeleccionado.marca}</p>
           </div>
           <div>
             <p className="text-xs text-muted-foreground mb-1">Subcategoría</p>
-            <p className="font-medium">{productoSeleccionado.subcategoria}</p>
+            <p className="font-medium text-sm">{productoSeleccionado.subcategoria}</p>
           </div>
         </div>
 
-        {/* Toggle costos */}
-        <div className="flex justify-end">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={toggleMostrarCostos}
-            className="gap-2 text-xs"
-          >
-            {mostrarCostos ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
-            {mostrarCostos ? 'Ocultar costos' : 'Mostrar costos'}
-          </Button>
-        </div>
-
-        {/* Precios */}
-        <div className="space-y-3 p-4 bg-card border border-border rounded-lg">
-          {mostrarCostos && (
-            <>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Precio costo</span>
-                <span className="font-medium">{formatearPrecio(productoSeleccionado.precioCosto)}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Precio lista</span>
-                <span className="font-medium">{formatearPrecio(productoSeleccionado.precioLista)}</span>
-              </div>
-              <div className="h-px bg-border" />
-            </>
-          )}
+        {/* Toggle costos + Precios */}
+        <div className="space-y-2 p-3 bg-card border border-border rounded-lg">
           <div className="flex justify-between items-center">
-            <span className="text-sm font-semibold">Precio final</span>
-            <span className="text-lg font-bold text-accent">{formatearPrecio(precioFinal)}</span>
+            <span className="text-sm font-semibold">Precio</span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleMostrarCostos}
+              className="gap-1 text-xs h-7 px-2"
+            >
+              {mostrarCostos ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+              {mostrarCostos ? 'Ocultar costo' : 'Ver costo'}
+            </Button>
+          </div>
+          
+          {mostrarCostos && (
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-muted-foreground">P. Distribuidor</span>
+              <span className="font-medium">{formatearPrecio(precioDistribuidor)}</span>
+            </div>
+          )}
+          
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-muted-foreground">Precio Lista (+{porcentaje}%)</span>
+            <span className="text-lg font-bold text-accent">{formatearPrecio(precioLista)}</span>
           </div>
         </div>
 
-        {/* Controles - Cantidad y Porcentaje compactos */}
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
-            {/* Cantidad */}
-            <div>
-              <Label htmlFor="cantidad" className="text-xs font-semibold mb-1.5 block">
-                Cantidad
-              </Label>
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={() => setCantidad(Math.max(1, cantidad - 1))}
-                >
-                  <Minus className="h-3 w-3" />
-                </Button>
-                <Input
-                  id="cantidad"
-                  type="number"
-                  min="1"
-                  value={cantidad}
-                  onChange={(e) => setCantidad(Math.max(1, parseInt(e.target.value) || 1))}
-                  className="text-center font-semibold h-8 w-14"
-                />
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={() => setCantidad(cantidad + 1)}
-                >
-                  <Plus className="h-3 w-3" />
-                </Button>
-              </div>
-            </div>
-
-            {/* Porcentaje */}
-            <div>
-              <Label htmlFor="porcentaje" className="text-xs font-semibold mb-1.5 block">
-                Ganancia
-              </Label>
-              <Select value={porcentaje.toString()} onValueChange={(v) => setPorcentaje(parseInt(v))}>
-                <SelectTrigger className="h-8 w-20">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {PORCENTAJES_DISPONIBLES.map((p) => (
-                    <SelectItem key={p} value={p.toString()}>
-                      {p}%
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+        {/* Controles - Cantidad y Porcentaje compactos en una línea */}
+        <div className="grid grid-cols-2 gap-2">
+          {/* Cantidad */}
+          <div>
+            <Label htmlFor="cantidad" className="text-xs font-semibold mb-1 block">
+              Cant.
+            </Label>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-7 w-7"
+                onClick={() => setCantidad(Math.max(1, cantidad - 1))}
+              >
+                <Minus className="h-3 w-3" />
+              </Button>
+              <Input
+                id="cantidad"
+                type="number"
+                min="1"
+                value={cantidad}
+                onChange={(e) => setCantidad(Math.max(1, parseInt(e.target.value) || 1))}
+                className="text-center font-semibold h-7 w-12 text-sm"
+              />
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-7 w-7"
+                onClick={() => setCantidad(cantidad + 1)}
+              >
+                <Plus className="h-3 w-3" />
+              </Button>
             </div>
           </div>
 
-          {/* Subtotal */}
-          <div className="p-4 bg-accent/10 rounded-lg border border-accent/20">
-            <div className="flex justify-between items-center">
-              <span className="font-semibold">Subtotal</span>
-              <span className="text-xl font-bold text-accent">{formatearPrecio(subtotal)}</span>
-            </div>
+          {/* Porcentaje */}
+          <div>
+            <Label htmlFor="porcentaje" className="text-xs font-semibold mb-1 block">
+              Ganancia
+            </Label>
+            <Select value={porcentaje.toString()} onValueChange={(v) => setPorcentaje(parseInt(v))}>
+              <SelectTrigger className="h-7 w-full text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {PORCENTAJES_DISPONIBLES.map((p) => (
+                  <SelectItem key={p} value={p.toString()}>
+                    {p}%
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        {/* Subtotal */}
+        <div className="p-3 bg-accent/10 rounded-lg border border-accent/20">
+          <div className="flex justify-between items-center">
+            <span className="font-semibold text-sm">Subtotal</span>
+            <span className="text-lg font-bold text-accent">{formatearPrecio(subtotal)}</span>
           </div>
         </div>
 
@@ -198,8 +191,7 @@ export function ProductDetailPanel() {
         <div className="flex gap-2">
           <Button
             onClick={handleAgregarOActualizar}
-            className="flex-1 bg-accent hover:bg-accent/90 text-accent-foreground shadow-glow-accent"
-            size="lg"
+            className="flex-1 bg-accent hover:bg-accent/90 text-accent-foreground shadow-glow-accent h-9"
           >
             {itemEnPedido ? 'Actualizar' : 'Agregar'}
           </Button>
@@ -208,8 +200,7 @@ export function ProductDetailPanel() {
             <Button
               onClick={handleEliminar}
               variant="outline"
-              size="lg"
-              className="w-auto px-4"
+              className="w-auto px-3 h-9"
             >
               <Trash2 className="h-4 w-4" />
             </Button>
@@ -218,10 +209,10 @@ export function ProductDetailPanel() {
 
         {/* Estado en pedido */}
         {itemEnPedido && (
-          <div className="p-3 bg-accent/10 rounded-lg text-sm">
-            <p className="font-medium text-accent mb-1">✓ Producto en el pedido</p>
+          <div className="p-2 bg-accent/10 rounded-lg text-xs">
+            <p className="font-medium text-accent">✓ En pedido</p>
             <p className="text-muted-foreground">
-              Cantidad actual: {itemEnPedido.cantidad} × {formatearPrecio(itemEnPedido.precioUnitarioFinal)}
+              {itemEnPedido.cantidad} × {formatearPrecio(itemEnPedido.precioUnitarioFinal)}
             </p>
           </div>
         )}
