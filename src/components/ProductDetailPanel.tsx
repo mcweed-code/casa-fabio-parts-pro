@@ -58,22 +58,25 @@ export function ProductDetailPanel() {
 
   return (
     <div className="flex flex-col h-full overflow-y-auto">
-      {/* Imagen con lightbox */}
-      <div className="h-28 w-full bg-muted flex items-center justify-center overflow-hidden shrink-0">
-        <ImageLightbox
-          src={imagenUrl}
-          alt={productoSeleccionado.descripcion}
-          className="w-full h-full object-contain"
-          fallback={<Package className="h-12 w-12 text-muted-foreground opacity-30" />}
-        />
-      </div>
-
       {/* Contenido compacto */}
       <div className="flex-1 p-3 space-y-2 overflow-y-auto">
+        {/* Imagen con lightbox - más pequeña */}
+        <div className="h-20 w-full bg-muted rounded flex items-center justify-center overflow-hidden shrink-0">
+          <ImageLightbox
+            src={imagenUrl}
+            alt={productoSeleccionado.descripcion}
+            className="w-full h-full object-contain"
+            fallback={<Package className="h-10 w-10 text-muted-foreground opacity-30" />}
+          />
+        </div>
+
         {/* Info básica */}
         <div>
           <span className="inline-block px-2 py-0.5 bg-accent/10 text-accent text-xs font-semibold rounded-full mb-1">
             {productoSeleccionado.categoria}
+          </span>
+          <span className="inline-block px-2 py-0.5 bg-secondary text-secondary-foreground text-xs rounded-full mb-1 ml-1">
+            {productoSeleccionado.subcategoria}
           </span>
           <h2 className="text-sm font-bold leading-tight mb-0.5">
             {productoSeleccionado.descripcion}
@@ -114,30 +117,30 @@ export function ProductDetailPanel() {
         </div>
 
         {/* Controles - solo mostrar ganancia si mostrarCostos */}
-        <div className={`grid ${mostrarCostos ? 'grid-cols-2' : 'grid-cols-1'} gap-2`}>
+        <div className="flex items-end gap-2">
           {/* Cantidad */}
-          <div>
+          <div className="flex-1">
             <Label className="text-xs font-semibold mb-1 block">Cant.</Label>
             <div className="flex items-center gap-1">
               <Button
                 variant="outline"
                 size="icon"
-                className="h-6 w-6"
+                className="h-7 w-7"
                 onClick={() => setCantidad(Math.max(1, cantidad - 1))}
               >
                 <Minus className="h-3 w-3" />
               </Button>
               <Input
-                type="number"
-                min="1"
+                type="text"
+                inputMode="numeric"
                 value={cantidad}
                 onChange={(e) => setCantidad(Math.max(1, parseInt(e.target.value) || 1))}
-                className="text-center font-semibold h-6 w-10 text-xs"
+                className="text-center font-semibold h-7 w-12 text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
               <Button
                 variant="outline"
                 size="icon"
-                className="h-6 w-6"
+                className="h-7 w-7"
                 onClick={() => setCantidad(cantidad + 1)}
               >
                 <Plus className="h-3 w-3" />
@@ -150,7 +153,7 @@ export function ProductDetailPanel() {
             <div>
               <Label className="text-xs font-semibold mb-1 block">Ganancia</Label>
               <Select value={porcentaje.toString()} onValueChange={(v) => setPorcentaje(parseInt(v))}>
-                <SelectTrigger className="h-6 w-full text-xs">
+                <SelectTrigger className="h-7 w-16 text-xs">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

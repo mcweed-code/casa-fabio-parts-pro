@@ -153,7 +153,7 @@ export function ProductTable() {
           </div>
         ) : (
           <table className="w-full text-xs">
-            <thead className="sticky top-0 bg-table-header text-foreground z-10">
+            <thead className="sticky top-0 bg-[hsl(var(--table-header))] text-[hsl(var(--table-header-foreground))] z-10">
               <tr>
                 <th className="text-left px-2 py-1.5 font-semibold">Código</th>
                 <th className="text-left px-2 py-1.5 font-semibold">Descripción</th>
@@ -176,7 +176,7 @@ export function ProductTable() {
                       'cursor-pointer border-b border-border transition-smooth',
                       isSelected
                         ? 'bg-accent/20'
-                        : 'hover:bg-table-row-hover'
+                        : 'hover:bg-[hsl(var(--table-row-hover))]'
                     )}
                   >
                     <td className="px-2 py-1.5 font-mono font-medium">
@@ -185,7 +185,13 @@ export function ProductTable() {
                     <td className="px-2 py-1.5 truncate max-w-[150px]">
                       {producto.descripcion}
                     </td>
-                    <td className="px-2 py-1.5 text-muted-foreground">
+                    <td 
+                      className="px-2 py-1.5 text-muted-foreground hover:text-accent hover:underline cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedMarca(producto.marca);
+                      }}
+                    >
                       {producto.marca}
                     </td>
                     <td className="px-2 py-1.5 text-right font-medium">
