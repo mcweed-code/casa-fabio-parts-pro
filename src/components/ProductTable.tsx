@@ -9,13 +9,31 @@ import { cn } from '@/lib/utils';
 
 const ITEMS_PER_PAGE = 50;
 
+// Exportar setters para uso externo
+let externalSetCategory: ((cat: string) => void) | null = null;
+let externalSetSubcategory: ((subcat: string) => void) | null = null;
+
+export const setTableCategory = (cat: string) => externalSetCategory?.(cat);
+export const setTableSubcategory = (subcat: string) => externalSetSubcategory?.(subcat);
+export const setTableCategoryAndSubcategory = (cat: string, subcat: string) => {
+  externalSetCategory?.(cat);
+  setTimeout(() => externalSetSubcategory?.(subcat), 0);
+};
+
 export function ProductTable() {
-  const { productos, productoSeleccionado, setProductoSeleccionado, mostrarCostos } = useAppStore();
+  const { productos, productoSeleccionado, setProductoSeleccionado } = useAppStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('Todas');
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>('Todas');
   const [selectedMarca, setSelectedMarca] = useState<string>('Todas');
   const [currentPage, setCurrentPage] = useState(1);
+
+  // Exponer setters
+  externalSetCategory = (cat: string) => {
+    setSelectedCategory(cat);
+    setSelectedSubcategory('Todas');
+  };
+  externalSetSubcategory = setSelectedSubcategory;
 
   const handleLimpiarFiltros = () => {
     setSearchTerm('');
@@ -158,16 +176,12 @@ export function ProductTable() {
                 <th className="text-left px-2 py-1.5 font-semibold">Código</th>
                 <th className="text-left px-2 py-1.5 font-semibold">Descripción</th>
                 <th className="text-left px-2 py-1.5 font-semibold">Marca</th>
-                <th className="text-right px-2 py-1.5 font-semibold">
-                  {mostrarCostos ? 'P. Lista' : 'P. Venta'}
-                </th>
+                <th className="text-right px-2 py-1.5 font-semibold">P. Lista</th>
               </tr>
             </thead>
             <tbody>
               {productosPaginados.map((producto) => {
                 const isSelected = productoSeleccionado?.codigo === producto.codigo;
-                // Siempre mostrar precio de lista (precioCosto) en la tabla
-                const precioMostrar = producto.precioCosto;
                 return (
                   <tr
                     key={producto.codigo}
@@ -182,30 +196,8 @@ export function ProductTable() {
                     <td className="px-2 py-1.5 font-mono font-medium">
                       {producto.codigo}
                     </td>
-                    <td className="px-2 py-1.5">
-                      <div className="flex items-center gap-1.5">
-                        <span className="truncate max-w-[120px]">{producto.descripcion}</span>
-                        <span 
-                          className="text-[10px] px-1 py-0.5 rounded bg-accent/20 text-accent hover:bg-accent hover:text-accent-foreground cursor-pointer shrink-0"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedCategory(producto.categoria);
-                            setSelectedSubcategory('Todas');
-                          }}
-                        >
-                          {producto.categoria}
-                        </span>
-                        <span 
-                          className="text-[10px] px-1 py-0.5 rounded bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground cursor-pointer shrink-0"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedCategory(producto.categoria);
-                            setSelectedSubcategory(producto.subcategoria);
-                          }}
-                        >
-                          {producto.subcategoria}
-                        </span>
-                      </div>
+                    <td className="px-2 py-1.5 truncate max-w-[200px]">
+                      {producto.descripcion}
                     </td>
                     <td 
                       className="px-2 py-1.5 text-muted-foreground hover:text-accent hover:underline cursor-pointer"
@@ -217,7 +209,7 @@ export function ProductTable() {
                       {producto.marca}
                     </td>
                     <td className="px-2 py-1.5 text-right font-medium">
-                      {formatearPrecio(precioMostrar)}
+                      {formatearPrecio(producto.precioCosto)}
                     </td>
                   </tr>
                 );
