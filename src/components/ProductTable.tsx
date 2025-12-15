@@ -166,8 +166,8 @@ export function ProductTable() {
             <tbody>
               {productosPaginados.map((producto) => {
                 const isSelected = productoSeleccionado?.codigo === producto.codigo;
-                // Cuando oculta costos, mostrar precioLista (venta); cuando muestra costos, mostrar precioCosto (lista)
-                const precioMostrar = mostrarCostos ? producto.precioCosto : producto.precioLista;
+                // Siempre mostrar precio de lista (precioCosto) en la tabla
+                const precioMostrar = producto.precioCosto;
                 return (
                   <tr
                     key={producto.codigo}
@@ -182,8 +182,30 @@ export function ProductTable() {
                     <td className="px-2 py-1.5 font-mono font-medium">
                       {producto.codigo}
                     </td>
-                    <td className="px-2 py-1.5 truncate max-w-[150px]">
-                      {producto.descripcion}
+                    <td className="px-2 py-1.5">
+                      <div className="flex items-center gap-1.5">
+                        <span className="truncate max-w-[120px]">{producto.descripcion}</span>
+                        <span 
+                          className="text-[10px] px-1 py-0.5 rounded bg-accent/20 text-accent hover:bg-accent hover:text-accent-foreground cursor-pointer shrink-0"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedCategory(producto.categoria);
+                            setSelectedSubcategory('Todas');
+                          }}
+                        >
+                          {producto.categoria}
+                        </span>
+                        <span 
+                          className="text-[10px] px-1 py-0.5 rounded bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground cursor-pointer shrink-0"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedCategory(producto.categoria);
+                            setSelectedSubcategory(producto.subcategoria);
+                          }}
+                        >
+                          {producto.subcategoria}
+                        </span>
+                      </div>
                     </td>
                     <td 
                       className="px-2 py-1.5 text-muted-foreground hover:text-accent hover:underline cursor-pointer"
