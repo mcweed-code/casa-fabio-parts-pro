@@ -10,13 +10,10 @@ import {
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { useAppStore } from '@/store/useAppStore';
 import { formatearPrecio } from '@/utils/pricing';
 import { enviarPorWhatsApp } from '@/utils/whatsapp';
 import { useToast } from '@/hooks/use-toast';
-
-const PORCENTAJES_DISPONIBLES = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100];
 
 export function OrderSummary() {
   const {
@@ -25,7 +22,6 @@ export function OrderSummary() {
     eliminarItemPedido,
     vaciarPedido,
     guardarPedido,
-    mostrarCostos,
   } = useAppStore();
 
   const { toast } = useToast();
@@ -84,54 +80,49 @@ export function OrderSummary() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-card border-t border-border">
-      {/* Header */}
-      <div className="p-4 border-b border-border bg-card/80">
-        <h2 className="text-lg font-bold">Pedido Actual</h2>
+    <div className="flex flex-col h-full bg-card border-t border-border overflow-hidden">
+      {/* Header compacto */}
+      <div className="px-3 py-2 border-b border-border bg-card/80 shrink-0">
+        <h2 className="text-sm font-bold">Pedido Actual</h2>
       </div>
 
-      {/* Items del pedido */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+      {/* Items del pedido - scroll horizontal si hay muchos */}
+      <div className="flex-1 overflow-auto p-2 min-h-0">
         {pedidoActual.items.length === 0 ? (
           <div className="flex items-center justify-center h-full text-center text-muted-foreground">
             <div>
-              <FileText className="h-12 w-12 mx-auto mb-2 opacity-30" />
-              <p className="text-sm">El pedido está vacío</p>
+              <FileText className="h-8 w-8 mx-auto mb-1 opacity-30" />
+              <p className="text-xs">Pedido vacío</p>
             </div>
           </div>
         ) : (
-          pedidoActual.items.map((item) => (
-            <div
-              key={item.producto.codigo}
-              className="p-3 bg-muted/50 rounded-lg border border-border space-y-2"
-            >
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex-1 min-w-0">
-                  <p className="font-mono text-xs font-semibold text-accent">
-                    {item.producto.codigo}
-                  </p>
-                  <p className="text-sm font-medium truncate">
-                    {item.producto.descripcion}
-                  </p>
-                  {mostrarCostos && (
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Costo: {formatearPrecio(item.producto.precioCosto)}
+          <div className="flex flex-wrap gap-2">
+            {pedidoActual.items.map((item) => (
+              <div
+                key={item.producto.codigo}
+                className="p-2 bg-muted/50 rounded border border-border min-w-[180px] max-w-[220px]"
+              >
+                <div className="flex items-start justify-between gap-1">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-mono text-xs font-semibold text-accent truncate">
+                      {item.producto.codigo}
                     </p>
-                  )}
+                    <p className="text-xs font-medium truncate" title={item.producto.descripcion}>
+                      {item.producto.descripcion}
+                    </p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-5 w-5 shrink-0"
+                    onClick={() => eliminarItemPedido(item.producto.codigo)}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 shrink-0"
-                  onClick={() => eliminarItemPedido(item.producto.codigo)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
 
-              {editandoItem === item.producto.codigo ? (
-                <div className="space-y-2 pt-2">
-                  <div className="grid grid-cols-2 gap-2">
+                {editandoItem === item.producto.codigo ? (
+                  <div className="mt-2 space-y-1">
                     <div>
                       <Label className="text-xs">Cantidad</Label>
                       <Input
@@ -145,119 +136,88 @@ export function OrderSummary() {
                             item.coeficientePorcentaje
                           )
                         }
-                        className="h-8 text-sm"
+                        className="h-6 text-xs"
                       />
                     </div>
-                    <div>
-                      <Label className="text-xs">Ganancia</Label>
-                      <Select 
-                        value={item.coeficientePorcentaje.toString()} 
-                        onValueChange={(v) =>
-                          actualizarItemPedido(
-                            item.producto.codigo,
-                            item.cantidad,
-                            parseInt(v)
-                          )
-                        }
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full h-5 text-xs"
+                      onClick={() => setEditandoItem(null)}
+                    >
+                      Listo
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between mt-1 pt-1 border-t border-border/50">
+                    <div className="text-xs text-muted-foreground">
+                      {item.cantidad} × {formatearPrecio(item.precioUnitarioFinal)}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-5 w-5"
+                        onClick={() => setEditandoItem(item.producto.codigo)}
                       >
-                        <SelectTrigger className="h-8">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {PORCENTAJES_DISPONIBLES.map((p) => (
-                            <SelectItem key={p} value={p.toString()}>
-                              {p}%
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                        <Edit2 className="h-3 w-3" />
+                      </Button>
+                      <p className="font-bold text-accent text-xs">
+                        {formatearPrecio(item.subtotal)}
+                      </p>
                     </div>
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full h-7"
-                    onClick={() => setEditandoItem(null)}
-                  >
-                    Listo
-                  </Button>
-                </div>
-              ) : (
-                <div className="flex items-end justify-between pt-2 border-t border-border/50">
-                  <div className="text-xs text-muted-foreground space-y-0.5">
-                    <p>Cant: {item.cantidad} × {formatearPrecio(item.precioUnitarioFinal)}</p>
-                    <p>Ganancia: {item.coeficientePorcentaje}%</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7"
-                      onClick={() => setEditandoItem(item.producto.codigo)}
-                    >
-                      <Edit2 className="h-3 w-3" />
-                    </Button>
-                    <p className="font-bold text-accent">
-                      {formatearPrecio(item.subtotal)}
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-          ))
+                )}
+              </div>
+            ))}
+          </div>
         )}
       </div>
 
-      {/* Total y acciones */}
-      <div className="border-t border-border bg-card/80">
-        <div className="p-4 bg-accent/10">
-          <div className="flex justify-between items-center">
-            <span className="text-lg font-bold">TOTAL</span>
-            <span className="text-2xl font-bold text-accent">
-              {formatearPrecio(pedidoActual.total)}
-            </span>
-          </div>
+      {/* Total y acciones compactas */}
+      <div className="border-t border-border bg-card/80 shrink-0">
+        <div className="px-3 py-2 bg-accent/10 flex justify-between items-center">
+          <span className="text-sm font-bold">TOTAL</span>
+          <span className="text-lg font-bold text-accent">
+            {formatearPrecio(pedidoActual.total)}
+          </span>
         </div>
 
-        <div className="p-4 space-y-2">
+        <div className="p-2 flex gap-2">
           <Button
             onClick={handleEnviarWhatsApp}
-            className="w-full bg-[#25D366] hover:bg-[#20BA5A] text-white"
-            size="lg"
+            className="flex-1 bg-[#25D366] hover:bg-[#20BA5A] text-white h-8 text-xs"
             disabled={pedidoActual.items.length === 0}
           >
-            <Send className="h-4 w-4 mr-2" />
-            Enviar por WhatsApp
+            <Send className="h-3 w-3 mr-1" />
+            WhatsApp
           </Button>
 
-          <div className="grid grid-cols-2 gap-2">
-            <Button
-              onClick={handleGuardarPedido}
-              variant="outline"
-              disabled={pedidoActual.items.length === 0}
-            >
-              <Save className="h-4 w-4 mr-2" />
-              Guardar
-            </Button>
+          <Button
+            onClick={handleGuardarPedido}
+            variant="outline"
+            className="h-8 px-3"
+            disabled={pedidoActual.items.length === 0}
+          >
+            <Save className="h-3 w-3" />
+          </Button>
 
-            <Button
-              onClick={handleImprimir}
-              variant="outline"
-              disabled={pedidoActual.items.length === 0}
-            >
-              <FileText className="h-4 w-4 mr-2" />
-              Imprimir
-            </Button>
-          </div>
+          <Button
+            onClick={handleImprimir}
+            variant="outline"
+            className="h-8 px-3"
+            disabled={pedidoActual.items.length === 0}
+          >
+            <FileText className="h-3 w-3" />
+          </Button>
 
           <Button
             onClick={vaciarPedido}
             variant="outline"
-            className="w-full text-destructive hover:bg-destructive/10"
+            className="h-8 px-3 text-destructive hover:bg-destructive/10"
             disabled={pedidoActual.items.length === 0}
           >
-            <Trash2 className="h-4 w-4 mr-2" />
-            Vaciar pedido
+            <Trash2 className="h-3 w-3" />
           </Button>
         </div>
       </div>

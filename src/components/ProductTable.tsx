@@ -76,35 +76,36 @@ export function ProductTable() {
   }, [searchTerm, selectedCategory, selectedSubcategory, selectedMarca]);
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Filtros */}
-      <div className="p-4 space-y-3 border-b border-border bg-card/50">
-        <div className="flex gap-2">
+    <div className="flex flex-col h-full overflow-hidden">
+      {/* Filtros compactos */}
+      <div className="p-2 space-y-2 border-b border-border bg-card/50 shrink-0">
+        <div className="flex gap-1">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
             <Input
-              placeholder="Buscar por código o descripción..."
+              placeholder="Buscar..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+              className="pl-7 h-7 text-xs"
             />
           </div>
           <Button
             variant="outline"
             size="icon"
+            className="h-7 w-7"
             onClick={handleLimpiarFiltros}
             title="Limpiar búsqueda"
           >
-            <X className="h-4 w-4" />
+            <X className="h-3 w-3" />
           </Button>
         </div>
 
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-3 gap-1">
           <Select value={selectedCategory} onValueChange={(value) => {
             setSelectedCategory(value);
             setSelectedSubcategory('Todas');
           }}>
-            <SelectTrigger>
+            <SelectTrigger className="h-7 text-xs">
               <SelectValue placeholder="Categoría" />
             </SelectTrigger>
             <SelectContent>
@@ -117,7 +118,7 @@ export function ProductTable() {
           </Select>
 
           <Select value={selectedSubcategory} onValueChange={setSelectedSubcategory}>
-            <SelectTrigger>
+            <SelectTrigger className="h-7 text-xs">
               <SelectValue placeholder="Subcategoría" />
             </SelectTrigger>
             <SelectContent>
@@ -130,7 +131,7 @@ export function ProductTable() {
           </Select>
 
           <Select value={selectedMarca} onValueChange={setSelectedMarca}>
-            <SelectTrigger>
+            <SelectTrigger className="h-7 text-xs">
               <SelectValue placeholder="Marca" />
             </SelectTrigger>
             <SelectContent>
@@ -145,27 +146,27 @@ export function ProductTable() {
       </div>
 
       {/* Tabla */}
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto min-h-0">
         {productosFiltrados.length === 0 ? (
-          <div className="flex items-center justify-center h-full text-muted-foreground">
+          <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
             No se encontraron productos
           </div>
         ) : (
-          <table className="w-full">
+          <table className="w-full text-xs">
             <thead className="sticky top-0 bg-table-header text-foreground z-10">
               <tr>
-                <th className="text-left px-4 py-3 font-semibold text-sm">Código</th>
-                <th className="text-left px-4 py-3 font-semibold text-sm">Descripción</th>
-                <th className="text-left px-4 py-3 font-semibold text-sm">Marca</th>
-                <th className="text-right px-4 py-3 font-semibold text-sm">
-                  {mostrarCostos ? 'P. Distribuidor' : 'Precio Lista'}
+                <th className="text-left px-2 py-1.5 font-semibold">Código</th>
+                <th className="text-left px-2 py-1.5 font-semibold">Descripción</th>
+                <th className="text-left px-2 py-1.5 font-semibold">Marca</th>
+                <th className="text-right px-2 py-1.5 font-semibold">
+                  {mostrarCostos ? 'P. Lista' : 'P. Venta'}
                 </th>
               </tr>
             </thead>
             <tbody>
               {productosPaginados.map((producto) => {
                 const isSelected = productoSeleccionado?.codigo === producto.codigo;
-                // Cuando oculta costos, mostrar precioLista; cuando muestra costos, mostrar precioCosto
+                // Cuando oculta costos, mostrar precioLista (venta); cuando muestra costos, mostrar precioCosto (lista)
                 const precioMostrar = mostrarCostos ? producto.precioCosto : producto.precioLista;
                 return (
                   <tr
@@ -178,16 +179,16 @@ export function ProductTable() {
                         : 'hover:bg-table-row-hover'
                     )}
                   >
-                    <td className="px-4 py-3 font-mono text-sm font-medium">
+                    <td className="px-2 py-1.5 font-mono font-medium">
                       {producto.codigo}
                     </td>
-                    <td className="px-4 py-3 text-sm">
+                    <td className="px-2 py-1.5 truncate max-w-[150px]">
                       {producto.descripcion}
                     </td>
-                    <td className="px-4 py-3 text-sm text-muted-foreground">
+                    <td className="px-2 py-1.5 text-muted-foreground">
                       {producto.marca}
                     </td>
-                    <td className="px-4 py-3 text-sm text-right font-medium">
+                    <td className="px-2 py-1.5 text-right font-medium">
                       {formatearPrecio(precioMostrar)}
                     </td>
                   </tr>
@@ -198,32 +199,34 @@ export function ProductTable() {
         )}
       </div>
 
-      {/* Paginación y contador */}
-      <div className="px-4 py-3 border-t border-border bg-card/50 flex items-center justify-between">
-        <div className="text-sm text-muted-foreground">
-          Mostrando {startIndex + 1}-{Math.min(endIndex, productosFiltrados.length)} de {productosFiltrados.length} productos
+      {/* Paginación compacta */}
+      <div className="px-2 py-1.5 border-t border-border bg-card/50 flex items-center justify-between shrink-0">
+        <div className="text-xs text-muted-foreground">
+          {startIndex + 1}-{Math.min(endIndex, productosFiltrados.length)} de {productosFiltrados.length}
         </div>
         
         {totalPages > 1 && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <Button
               variant="outline"
               size="sm"
+              className="h-6 px-2 text-xs"
               onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
               disabled={currentPage === 1}
             >
-              Anterior
+              Ant
             </Button>
-            <span className="text-sm">
-              Página {currentPage} de {totalPages}
+            <span className="text-xs">
+              {currentPage}/{totalPages}
             </span>
             <Button
               variant="outline"
               size="sm"
+              className="h-6 px-2 text-xs"
               onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
             >
-              Siguiente
+              Sig
             </Button>
           </div>
         )}
