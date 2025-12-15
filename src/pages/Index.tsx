@@ -39,26 +39,26 @@ const Index = () => {
   }, [theme, productos.length, setCatalogo, setCatalogoLoading]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="h-screen max-h-screen flex flex-col bg-background overflow-hidden">
       <Header />
       
-      {/* Layout dividido: arriba catálogo, abajo pedido */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Parte superior: Catálogo (tabla y detalle) */}
-        <div className="h-[60%] flex border-b border-border">
-          {/* Tabla de productos */}
-          <div className="w-[50%] border-r border-border">
+      {/* Layout compacto para 960x600 */}
+      <div className="flex-1 flex flex-col overflow-hidden min-h-0">
+        {/* Parte superior: Catálogo (tabla y detalle) - 55% */}
+        <div className="flex-[55] flex border-b border-border min-h-0">
+          {/* Tabla de productos - 55% */}
+          <div className="w-[55%] border-r border-border overflow-hidden">
             <ProductTable />
           </div>
 
-          {/* Panel de detalle */}
-          <div className="w-[50%]">
+          {/* Panel de detalle - 45% */}
+          <div className="w-[45%] overflow-hidden">
             <ProductDetailPanel />
           </div>
         </div>
 
-        {/* Parte inferior: Pedido actual */}
-        <div className="h-[40%]">
+        {/* Parte inferior: Pedido actual - 45% */}
+        <div className="flex-[45] overflow-hidden">
           <OrderSummary />
         </div>
       </div>

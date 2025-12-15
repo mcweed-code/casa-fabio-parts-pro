@@ -5,7 +5,8 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { useAppStore } from '@/store/useAppStore';
-import { formatearPrecio, calcularPrecioFinal, calcularSubtotal } from '@/utils/pricing';
+import { formatearPrecio, calcularPrecioFinal } from '@/utils/pricing';
+import { ImageLightbox } from './ImageLightbox';
 
 const PORCENTAJES_DISPONIBLES = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100];
 
@@ -22,20 +23,22 @@ export function ProductDetailPanel() {
   const [cantidad, setCantidad] = useState(1);
   const [porcentaje, setPorcentaje] = useState(25);
 
-  // Verificar si el producto está en el pedido
   const itemEnPedido = productoSeleccionado
     ? pedidoActual.items.find((item) => item.producto.codigo === productoSeleccionado.codigo)
     : null;
 
-  // Precio de lista = precio distribuidor + porcentaje de ganancia
-  // El precio distribuidor (precioCosto) es la base, el precioLista se calcula
-  const precioDistribuidor = productoSeleccionado?.precioCosto || 0;
-  const precioLista = calcularPrecioFinal(precioDistribuidor, porcentaje);
-  const subtotal = calcularSubtotal(precioLista, cantidad);
+  // Precio de Lista = precio base del producto
+  // Precio de Venta = precio de lista + ganancia
+  const precioLista = productoSeleccionado?.precioCosto || 0;
+  const precioVenta = calcularPrecioFinal(precioLista, porcentaje);
+
+  // URL de imagen desde servidor
+  const imagenUrl = productoSeleccionado 
+    ? `https://casafabio.com.ar/media/${productoSeleccionado.codigo}.jpg`
+    : '';
 
   const handleAgregarOActualizar = () => {
     if (!productoSeleccionado) return;
-    // Al agregar al pedido, se suma el precio de costo (distribuidor)
     agregarItemPedido(productoSeleccionado, cantidad, porcentaje);
   };
 
@@ -46,112 +49,95 @@ export function ProductDetailPanel() {
 
   if (!productoSeleccionado) {
     return (
-      <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-8 text-center">
-        <Package className="h-16 w-16 mb-4 opacity-50" />
-        <p className="text-lg">Seleccioná un producto de la lista</p>
-        <p className="text-sm mt-2">para ver el detalle completo</p>
+      <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-4 text-center">
+        <Package className="h-12 w-12 mb-2 opacity-50" />
+        <p className="text-sm">Seleccioná un producto</p>
       </div>
     );
   }
 
   return (
     <div className="flex flex-col h-full overflow-y-auto">
-      {/* Imagen */}
-      <div className="aspect-video w-full bg-muted flex items-center justify-center overflow-hidden">
-        {productoSeleccionado.imagenUrl ? (
-          <img
-            src={productoSeleccionado.imagenUrl}
-            alt={productoSeleccionado.descripcion}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <Package className="h-20 w-20 text-muted-foreground opacity-30" />
-        )}
+      {/* Imagen con lightbox */}
+      <div className="h-28 w-full bg-muted flex items-center justify-center overflow-hidden shrink-0">
+        <ImageLightbox
+          src={imagenUrl}
+          alt={productoSeleccionado.descripcion}
+          className="w-full h-full object-contain"
+          fallback={<Package className="h-12 w-12 text-muted-foreground opacity-30" />}
+        />
       </div>
 
-      {/* Contenido */}
-      <div className="flex-1 p-4 space-y-4">
+      {/* Contenido compacto */}
+      <div className="flex-1 p-3 space-y-2 overflow-y-auto">
         {/* Info básica */}
         <div>
-          <div className="inline-block px-3 py-1 bg-accent/10 text-accent text-xs font-semibold rounded-full mb-2">
+          <span className="inline-block px-2 py-0.5 bg-accent/10 text-accent text-xs font-semibold rounded-full mb-1">
             {productoSeleccionado.categoria}
-          </div>
-          <h2 className="text-xl font-bold mb-1">
+          </span>
+          <h2 className="text-sm font-bold leading-tight mb-0.5">
             {productoSeleccionado.descripcion}
           </h2>
-          <p className="text-muted-foreground text-sm">
-            Código: <span className="font-mono font-medium text-foreground">{productoSeleccionado.codigo}</span>
+          <p className="text-muted-foreground text-xs">
+            <span className="font-mono">{productoSeleccionado.codigo}</span> · {productoSeleccionado.marca}
           </p>
         </div>
 
-        {/* Detalles técnicos */}
-        <div className="grid grid-cols-2 gap-3 p-3 bg-muted/50 rounded-lg">
-          <div>
-            <p className="text-xs text-muted-foreground mb-1">Marca</p>
-            <p className="font-medium text-sm">{productoSeleccionado.marca}</p>
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground mb-1">Subcategoría</p>
-            <p className="font-medium text-sm">{productoSeleccionado.subcategoria}</p>
-          </div>
-        </div>
-
-        {/* Toggle costos + Precios */}
-        <div className="space-y-2 p-3 bg-card border border-border rounded-lg">
+        {/* Precios */}
+        <div className="p-2 bg-card border border-border rounded-lg space-y-1">
           <div className="flex justify-between items-center">
-            <span className="text-sm font-semibold">Precio</span>
+            <span className="text-xs font-semibold">Precio</span>
             <Button
               variant="ghost"
               size="sm"
               onClick={toggleMostrarCostos}
-              className="gap-1 text-xs h-7 px-2"
+              className="gap-1 text-xs h-6 px-2"
             >
               {mostrarCostos ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
-              {mostrarCostos ? 'Ocultar costo' : 'Ver costo'}
+              {mostrarCostos ? 'Ocultar' : 'Ver costo'}
             </Button>
           </div>
           
           {mostrarCostos && (
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-muted-foreground">P. Distribuidor</span>
-              <span className="font-medium">{formatearPrecio(precioDistribuidor)}</span>
+            <div className="flex justify-between items-center text-xs">
+              <span className="text-muted-foreground">P. Lista</span>
+              <span className="font-medium">{formatearPrecio(precioLista)}</span>
             </div>
           )}
           
           <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground">Precio Lista (+{porcentaje}%)</span>
-            <span className="text-lg font-bold text-accent">{formatearPrecio(precioLista)}</span>
+            <span className="text-xs text-muted-foreground">
+              P. Venta {mostrarCostos && `(+${porcentaje}%)`}
+            </span>
+            <span className="text-base font-bold text-accent">{formatearPrecio(precioVenta)}</span>
           </div>
         </div>
 
-        {/* Controles - Cantidad y Porcentaje compactos en una línea */}
-        <div className="grid grid-cols-2 gap-2">
+        {/* Controles - solo mostrar ganancia si mostrarCostos */}
+        <div className={`grid ${mostrarCostos ? 'grid-cols-2' : 'grid-cols-1'} gap-2`}>
           {/* Cantidad */}
           <div>
-            <Label htmlFor="cantidad" className="text-xs font-semibold mb-1 block">
-              Cant.
-            </Label>
+            <Label className="text-xs font-semibold mb-1 block">Cant.</Label>
             <div className="flex items-center gap-1">
               <Button
                 variant="outline"
                 size="icon"
-                className="h-7 w-7"
+                className="h-6 w-6"
                 onClick={() => setCantidad(Math.max(1, cantidad - 1))}
               >
                 <Minus className="h-3 w-3" />
               </Button>
               <Input
-                id="cantidad"
                 type="number"
                 min="1"
                 value={cantidad}
                 onChange={(e) => setCantidad(Math.max(1, parseInt(e.target.value) || 1))}
-                className="text-center font-semibold h-7 w-12 text-sm"
+                className="text-center font-semibold h-6 w-10 text-xs"
               />
               <Button
                 variant="outline"
                 size="icon"
-                className="h-7 w-7"
+                className="h-6 w-6"
                 onClick={() => setCantidad(cantidad + 1)}
               >
                 <Plus className="h-3 w-3" />
@@ -159,39 +145,31 @@ export function ProductDetailPanel() {
             </div>
           </div>
 
-          {/* Porcentaje */}
-          <div>
-            <Label htmlFor="porcentaje" className="text-xs font-semibold mb-1 block">
-              Ganancia
-            </Label>
-            <Select value={porcentaje.toString()} onValueChange={(v) => setPorcentaje(parseInt(v))}>
-              <SelectTrigger className="h-7 w-full text-sm">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {PORCENTAJES_DISPONIBLES.map((p) => (
-                  <SelectItem key={p} value={p.toString()}>
-                    {p}%
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {/* Porcentaje - solo visible cuando mostrarCostos */}
+          {mostrarCostos && (
+            <div>
+              <Label className="text-xs font-semibold mb-1 block">Ganancia</Label>
+              <Select value={porcentaje.toString()} onValueChange={(v) => setPorcentaje(parseInt(v))}>
+                <SelectTrigger className="h-6 w-full text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PORCENTAJES_DISPONIBLES.map((p) => (
+                    <SelectItem key={p} value={p.toString()}>
+                      {p}%
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
         </div>
 
-        {/* Subtotal */}
-        <div className="p-3 bg-accent/10 rounded-lg border border-accent/20">
-          <div className="flex justify-between items-center">
-            <span className="font-semibold text-sm">Subtotal</span>
-            <span className="text-lg font-bold text-accent">{formatearPrecio(subtotal)}</span>
-          </div>
-        </div>
-
-        {/* Botones de acción - en la misma línea */}
+        {/* Botones de acción */}
         <div className="flex gap-2">
           <Button
             onClick={handleAgregarOActualizar}
-            className="flex-1 bg-accent hover:bg-accent/90 text-accent-foreground shadow-glow-accent h-9"
+            className="flex-1 bg-accent hover:bg-accent/90 text-accent-foreground h-7 text-xs"
           >
             {itemEnPedido ? 'Actualizar' : 'Agregar'}
           </Button>
@@ -200,20 +178,17 @@ export function ProductDetailPanel() {
             <Button
               onClick={handleEliminar}
               variant="outline"
-              className="w-auto px-3 h-9"
+              className="w-auto px-2 h-7"
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className="h-3 w-3" />
             </Button>
           )}
         </div>
 
         {/* Estado en pedido */}
         {itemEnPedido && (
-          <div className="p-2 bg-accent/10 rounded-lg text-xs">
-            <p className="font-medium text-accent">✓ En pedido</p>
-            <p className="text-muted-foreground">
-              {itemEnPedido.cantidad} × {formatearPrecio(itemEnPedido.precioUnitarioFinal)}
-            </p>
+          <div className="p-1.5 bg-accent/10 rounded text-xs">
+            <p className="font-medium text-accent">✓ En pedido: {itemEnPedido.cantidad} × {formatearPrecio(itemEnPedido.precioUnitarioFinal)}</p>
           </div>
         )}
       </div>
