@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { useAppStore } from '@/store/useAppStore';
 import { formatearPrecio, calcularPrecioFinal } from '@/utils/pricing';
 import { ImageLightbox } from './ImageLightbox';
+import { setTableCategory, setTableCategoryAndSubcategory } from './ProductTable';
 
 const PORCENTAJES_DISPONIBLES = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100];
 
@@ -32,9 +33,9 @@ export function ProductDetailPanel() {
   const precioLista = productoSeleccionado?.precioCosto || 0;
   const precioVenta = calcularPrecioFinal(precioLista, porcentaje);
 
-  // URL de imagen desde servidor (usar placeholder de prueba por ahora)
+  // URL de imagen: usar imagenUrl del producto si existe, sino del servidor
   const imagenUrl = productoSeleccionado 
-    ? `https://picsum.photos/seed/${productoSeleccionado.codigo}/200/150`
+    ? (productoSeleccionado.imagenUrl || `https://casafabio.com.ar/media/${productoSeleccionado.codigo}.jpg`)
     : '';
 
   const handleAgregarOActualizar = () => {
@@ -70,12 +71,18 @@ export function ProductDetailPanel() {
           />
         </div>
 
-        {/* Info básica */}
+        {/* Info básica - pastillas filtrables */}
         <div>
-          <span className="inline-block px-2 py-0.5 bg-accent/10 text-accent text-xs font-semibold rounded-full mb-1">
+          <span 
+            className="inline-block px-2 py-0.5 bg-accent/10 text-accent text-xs font-semibold rounded-full mb-1 hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors"
+            onClick={() => setTableCategory(productoSeleccionado.categoria)}
+          >
             {productoSeleccionado.categoria}
           </span>
-          <span className="inline-block px-2 py-0.5 bg-secondary text-secondary-foreground text-xs rounded-full mb-1 ml-1">
+          <span 
+            className="inline-block px-2 py-0.5 bg-secondary text-secondary-foreground text-xs rounded-full mb-1 ml-1 hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors"
+            onClick={() => setTableCategoryAndSubcategory(productoSeleccionado.categoria, productoSeleccionado.subcategoria)}
+          >
             {productoSeleccionado.subcategoria}
           </span>
           <h2 className="text-sm font-bold leading-tight mb-0.5">

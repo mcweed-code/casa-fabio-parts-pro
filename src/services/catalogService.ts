@@ -62,6 +62,16 @@ export const catalogService = {
  */
 export const mockCatalog: Producto[] = [
   {
+    codigo: 'TEST-001',
+    descripcion: 'Producto de Prueba con Imagen',
+    categoria: 'Prueba',
+    subcategoria: 'Demo',
+    marca: 'TestMarca',
+    precioCosto: 10000,
+    precioLista: 15000,
+    imagenUrl: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=400',
+  },
+  {
     codigo: 'FAR-001',
     descripcion: 'Faro Delantero Derecho Universal LED',
     categoria: 'Iluminación',
