@@ -27,25 +27,25 @@ export function Header() {
 
   return (
     <header className="border-b border-border bg-card sticky top-0 z-50 shadow-md">
-      <div className="container mx-auto px-6 h-16 flex items-center justify-between">
+      <div className="container mx-auto px-4 h-12 flex items-center justify-between">
         {/* Logo */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <img 
             src="/logo.svg" 
             alt="Casa Fabio" 
-            className="h-10 text-foreground"
+            className="h-8 text-foreground"
           />
         </div>
 
         {/* Acciones */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <Button
             variant="outline"
             size="sm"
             onClick={handleDescargarCatalogos}
-            className="gap-2"
+            className="gap-1.5 h-8 text-xs"
           >
-            <FileText className="h-4 w-4" />
+            <FileText className="h-3.5 w-3.5" />
             Catálogos PDF
           </Button>
           
@@ -53,9 +53,9 @@ export function Header() {
             variant="outline"
             size="sm"
             onClick={handleExportarExcel}
-            className="gap-2"
+            className="gap-1.5 h-8 text-xs"
           >
-            <Download className="h-4 w-4" />
+            <Download className="h-3.5 w-3.5" />
             Exportar lista
           </Button>
           
@@ -63,7 +63,7 @@ export function Header() {
             variant="default"
             size="icon"
             onClick={toggleTheme}
-            className="rounded-full bg-accent hover:bg-accent/80 text-accent-foreground"
+            className="rounded-full h-9 w-9 bg-accent hover:bg-accent/80 text-accent-foreground shadow-lg border-2 border-accent-foreground/20"
           >
             {theme === 'dark' ? (
               <Sun className="h-5 w-5" />

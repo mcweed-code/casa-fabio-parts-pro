@@ -8,53 +8,53 @@
 
 @layer base {
   :root {
-    /* Light theme (tema claro - más gris para no encandilar) */
-    --background: 220 13% 91%;
-    --foreground: 216 28% 12%;
+    /* Light theme (tema claro - gris suave para no encandilar) */
+    --background: 220 10% 88%;
+    --foreground: 216 28% 15%;
 
-    --card: 220 13% 95%;
-    --card-foreground: 216 28% 12%;
+    --card: 220 10% 92%;
+    --card-foreground: 216 28% 15%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 216 28% 12%;
+    --popover: 220 10% 94%;
+    --popover-foreground: 216 28% 15%;
 
-    /* Color primario de Casa Fabio: #18202e */
-    --primary: 216 28% 14%;
+    /* Color primario de Casa Fabio */
+    --primary: 216 28% 20%;
     --primary-foreground: 0 0% 99%;
 
-    /* Color secundario: #fdfdfd */
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 216 28% 14%;
+    /* Color secundario: gris claro */
+    --secondary: 220 10% 85%;
+    --secondary-foreground: 216 28% 15%;
 
-    /* Rojo acento para CTAs */
-    --accent: 0 84% 50%;
+    /* Rojo salmón acento para inputs/CTAs */
+    --accent: 0 70% 55%;
     --accent-foreground: 0 0% 100%;
 
-    --muted: 210 20% 94%;
-    --muted-foreground: 216 14% 45%;
+    --muted: 220 10% 82%;
+    --muted-foreground: 216 14% 40%;
 
     --destructive: 0 84% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 214 20% 88%;
-    --input: 214 20% 88%;
-    --ring: 0 84% 50%;
+    --border: 220 10% 75%;
+    --input: 0 70% 55%;
+    --ring: 0 70% 55%;
 
     --radius: 0.5rem;
 
-    /* Tabla y elementos específicos */
-    --table-header: 216 28% 18%;
-    --table-row-hover: 210 20% 96%;
+    /* Tabla - encabezados visibles con contraste */
+    --table-header: 220 10% 75%;
+    --table-header-foreground: 216 28% 15%;
+    --table-row-hover: 220 10% 85%;
     
     /* Shadows */
-    --shadow-sm: 0 1px 2px 0 hsl(216 28% 12% / 0.05);
-    --shadow-md: 0 4px 6px -1px hsl(216 28% 12% / 0.1);
-    --shadow-lg: 0 10px 15px -3px hsl(216 28% 12% / 0.1);
+    --shadow-sm: 0 1px 2px 0 hsl(216 28% 12% / 0.08);
+    --shadow-md: 0 4px 6px -1px hsl(216 28% 12% / 0.12);
+    --shadow-lg: 0 10px 15px -3px hsl(216 28% 12% / 0.15);
   }
 
   .dark {
     /* Dark theme (tema oscuro - por defecto) */
-    /* Background principal basado en #18202e */
     --background: 216 28% 14%;
     --foreground: 0 0% 99%;
 
@@ -88,6 +88,7 @@
 
     /* Tabla específica para dark */
     --table-header: 216 28% 12%;
+    --table-header-foreground: 0 0% 99%;
     --table-row-hover: 216 20% 20%;
     
     /* Shadows más sutiles en dark */

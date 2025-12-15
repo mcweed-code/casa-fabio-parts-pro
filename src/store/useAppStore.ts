@@ -79,8 +79,8 @@ export const useAppStore = create<AppState>()(
 
       agregarItemPedido: (producto, cantidad, porcentaje) => {
         const state = get();
-        // El precio unitario final es el costo del distribuidor + porcentaje de ganancia
-        const precioUnitarioFinal = calcularPrecioFinal(producto.precioCosto, porcentaje);
+        // El precio unitario final es el precio de lista (precioCosto del distribuidor)
+        const precioUnitarioFinal = producto.precioCosto;
         const subtotal = calcularSubtotal(precioUnitarioFinal, cantidad);
 
         const itemExistente = state.pedidoActual.items.find(
@@ -129,11 +129,8 @@ export const useAppStore = create<AppState>()(
         set((state) => {
           const itemsActualizados = state.pedidoActual.items.map((item) => {
             if (item.producto.codigo === codigoProducto) {
-              // El precio unitario final es el costo del distribuidor + porcentaje de ganancia
-              const precioUnitarioFinal = calcularPrecioFinal(
-                item.producto.precioCosto,
-                porcentaje
-              );
+              // El precio unitario final es el precio de lista (precioCosto del distribuidor)
+              const precioUnitarioFinal = item.producto.precioCosto;
               const subtotal = calcularSubtotal(precioUnitarioFinal, cantidad);
               return {
                 ...item,
