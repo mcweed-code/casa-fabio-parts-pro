@@ -32,9 +32,9 @@ export function ProductDetailPanel() {
   const precioLista = productoSeleccionado?.precioCosto || 0;
   const precioVenta = calcularPrecioFinal(precioLista, porcentaje);
 
-  // URL de imagen desde servidor
+  // URL de imagen desde servidor (usar placeholder de prueba por ahora)
   const imagenUrl = productoSeleccionado 
-    ? `https://casafabio.com.ar/media/${productoSeleccionado.codigo}.jpg`
+    ? `https://picsum.photos/seed/${productoSeleccionado.codigo}/200/150`
     : '';
 
   const handleAgregarOActualizar = () => {
@@ -191,7 +191,7 @@ export function ProductDetailPanel() {
         {/* Estado en pedido */}
         {itemEnPedido && (
           <div className="p-1.5 bg-accent/10 rounded text-xs">
-            <p className="font-medium text-accent">✓ En pedido: {itemEnPedido.cantidad} × {formatearPrecio(itemEnPedido.precioUnitarioFinal)}</p>
+            <p className="font-medium text-accent">✓ En pedido: {itemEnPedido.cantidad} × {formatearPrecio(precioLista)}</p>
           </div>
         )}
       </div>
