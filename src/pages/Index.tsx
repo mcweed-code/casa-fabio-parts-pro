@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Header } from '@/components/Header';
 import { ProductTable } from '@/components/ProductTable';
 import { ProductDetailPanel } from '@/components/ProductDetailPanel';
@@ -10,6 +10,7 @@ const AUTO_REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutos
 
 const Index = () => {
   const { productos, setCatalogo, theme, setCatalogoLoading } = useAppStore();
+  const [orderExpanded, setOrderExpanded] = useState(false);
 
   // Cargar catálogo inicial, aplicar tema y configurar auto-refresh
   useEffect(() => {
@@ -42,24 +43,27 @@ const Index = () => {
     <div className="h-screen max-h-screen flex flex-col bg-background overflow-hidden">
       <Header />
       
-      {/* Layout compacto para 960x600 */}
+      {/* Layout adaptable */}
       <div className="flex-1 flex flex-col overflow-hidden min-h-0">
-        {/* Parte superior: Catálogo (tabla y detalle) - 55% */}
-        <div className="flex-[55] flex border-b border-border min-h-0">
-          {/* Tabla de productos - 55% */}
-          <div className="w-[55%] border-r border-border overflow-hidden">
+        {/* Parte superior: Catálogo (tabla y detalle) */}
+        <div className={`flex border-b border-border min-h-0 transition-all duration-300 ${orderExpanded ? 'flex-[55]' : 'flex-1'}`}>
+          {/* Tabla de productos - más ancha cuando pedido está colapsado */}
+          <div className={`border-r border-border overflow-hidden transition-all duration-300 ${orderExpanded ? 'w-[55%]' : 'w-[60%]'}`}>
             <ProductTable />
           </div>
 
-          {/* Panel de detalle - 45% */}
-          <div className="w-[45%] overflow-hidden">
+          {/* Panel de detalle */}
+          <div className={`overflow-hidden transition-all duration-300 ${orderExpanded ? 'w-[45%]' : 'w-[40%]'}`}>
             <ProductDetailPanel />
           </div>
         </div>
 
-        {/* Parte inferior: Pedido actual - 45% */}
-        <div className="flex-[45] overflow-hidden">
-          <OrderSummary />
+        {/* Parte inferior: Pedido (colapsable) */}
+        <div className={`shrink-0 transition-all duration-300 ${orderExpanded ? 'flex-[45] min-h-[120px]' : 'h-auto'}`}>
+          <OrderSummary 
+            isExpanded={orderExpanded} 
+            onToggle={() => setOrderExpanded(!orderExpanded)} 
+          />
         </div>
       </div>
 

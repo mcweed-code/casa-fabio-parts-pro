@@ -27,13 +27,13 @@ export function Header() {
 
   return (
     <header className="border-b border-border bg-card sticky top-0 z-50 shadow-md">
-      <div className="container mx-auto px-4 h-12 flex items-center justify-between">
-        {/* Logo */}
-        <div className="flex items-center gap-3">
+      <div className="container mx-auto px-3 h-10 flex items-center justify-between">
+        {/* Logo más grande */}
+        <div className="flex items-center">
           <img 
             src="/logo.svg" 
             alt="Casa Fabio" 
-            className="h-8 text-foreground"
+            className="h-9 w-auto"
           />
         </div>
 
