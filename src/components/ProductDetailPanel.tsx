@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Package, Minus, Plus, Trash2, Eye, EyeOff } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { useAppStore } from '@/store/useAppStore';
 import { formatearPrecio, calcularPrecioFinal } from '@/utils/pricing';
@@ -55,75 +54,87 @@ export function ProductDetailPanel() {
   }
 
   return (
-    <div className="flex h-full overflow-hidden">
-      {/* Imagen - 40% */}
-      <div className="w-[40%] bg-muted flex items-center justify-center p-2 shrink-0">
-        <ImageLightbox
-          src={imagenUrl}
-          alt={productoSeleccionado.descripcion}
-          className="w-full h-full object-contain max-h-full"
-          fallback={<Package className="h-12 w-12 text-muted-foreground opacity-30" />}
-        />
-      </div>
-
-      {/* Info - 60% */}
-      <div className="w-[60%] flex flex-col p-2 overflow-y-auto">
-        {/* Categorías filtrables */}
-        <div className="flex flex-wrap gap-1 mb-1">
-          <span 
-            className="px-1.5 py-0.5 bg-accent/10 text-accent text-[10px] font-semibold rounded-full hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors"
-            onClick={() => setTableCategory(productoSeleccionado.categoria)}
-          >
-            {productoSeleccionado.categoria}
-          </span>
-          <span 
-            className="px-1.5 py-0.5 bg-secondary text-secondary-foreground text-[10px] rounded-full hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors"
-            onClick={() => setTableCategoryAndSubcategory(productoSeleccionado.categoria, productoSeleccionado.subcategoria)}
-          >
-            {productoSeleccionado.subcategoria}
-          </span>
+    <div className="flex flex-col h-full overflow-hidden">
+      {/* Contenido principal: 50% foto - 50% info */}
+      <div className="flex-1 flex min-h-0">
+        {/* Imagen - 50% */}
+        <div className="w-1/2 bg-muted flex items-center justify-center p-2 shrink-0">
+          <ImageLightbox
+            src={imagenUrl}
+            alt={productoSeleccionado.descripcion}
+            className="w-full h-full object-contain max-h-full"
+            fallback={<Package className="h-12 w-12 text-muted-foreground opacity-30" />}
+          />
         </div>
 
-        {/* Título */}
-        <h2 className="text-xs font-bold leading-tight mb-0.5 line-clamp-2">
-          {productoSeleccionado.descripcion}
-        </h2>
-        <p className="text-muted-foreground text-[10px] mb-2">
-          <span className="font-mono">{productoSeleccionado.codigo}</span> · {productoSeleccionado.marca}
-        </p>
-
-        {/* Precios */}
-        <div className="p-1.5 bg-card border border-border rounded mb-2">
-          <div className="flex justify-between items-center mb-1">
-            <span className="text-[10px] font-semibold">Precio</span>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={toggleMostrarCostos}
-              className="gap-0.5 text-[10px] h-5 px-1.5"
+        {/* Info - 50% */}
+        <div className="w-1/2 flex flex-col p-2 overflow-y-auto">
+          {/* Categorías filtrables */}
+          <div className="flex flex-wrap gap-1 mb-1">
+            <span 
+              className="px-1.5 py-0.5 bg-accent/10 text-accent text-[10px] font-semibold rounded-full hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors"
+              onClick={() => setTableCategory(productoSeleccionado.categoria)}
             >
-              {mostrarCostos ? <EyeOff className="h-2.5 w-2.5" /> : <Eye className="h-2.5 w-2.5" />}
-              {mostrarCostos ? 'Ocultar' : 'Ver'}
-            </Button>
+              {productoSeleccionado.categoria}
+            </span>
+            <span 
+              className="px-1.5 py-0.5 bg-secondary text-secondary-foreground text-[10px] rounded-full hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors"
+              onClick={() => setTableCategoryAndSubcategory(productoSeleccionado.categoria, productoSeleccionado.subcategoria)}
+            >
+              {productoSeleccionado.subcategoria}
+            </span>
           </div>
-          
-          {mostrarCostos && (
-            <div className="flex justify-between items-center text-[10px]">
-              <span className="text-muted-foreground">P. Lista</span>
-              <span className="font-medium">{formatearPrecio(precioLista)}</span>
+
+          {/* Título */}
+          <h2 className="text-xs font-bold leading-tight mb-0.5 line-clamp-2">
+            {productoSeleccionado.descripcion}
+          </h2>
+          <p className="text-muted-foreground text-[10px] mb-2">
+            <span className="font-mono">{productoSeleccionado.codigo}</span> · {productoSeleccionado.marca}
+          </p>
+
+          {/* Precios */}
+          <div className="p-1.5 bg-card border border-border rounded flex-1">
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-[10px] font-semibold">Precio</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleMostrarCostos}
+                className="gap-0.5 text-[10px] h-5 px-1.5"
+              >
+                {mostrarCostos ? <EyeOff className="h-2.5 w-2.5" /> : <Eye className="h-2.5 w-2.5" />}
+                {mostrarCostos ? 'Ocultar' : 'Ver'}
+              </Button>
+            </div>
+            
+            {mostrarCostos && (
+              <div className="flex justify-between items-center text-[10px]">
+                <span className="text-muted-foreground">P. Lista</span>
+                <span className="font-medium">{formatearPrecio(precioLista)}</span>
+              </div>
+            )}
+            
+            <div className="flex justify-between items-center">
+              <span className="text-[10px] text-muted-foreground">
+                Venta {mostrarCostos && `(+${porcentaje}%)`}
+              </span>
+              <span className="text-sm font-bold text-accent">{formatearPrecio(precioVenta)}</span>
+            </div>
+          </div>
+
+          {/* Estado en pedido */}
+          {itemEnPedido && (
+            <div className="p-1 bg-accent/10 rounded text-[10px] mt-1.5">
+              <p className="font-medium text-accent">✓ En pedido: {itemEnPedido.cantidad} × {formatearPrecio(precioLista)}</p>
             </div>
           )}
-          
-          <div className="flex justify-between items-center">
-            <span className="text-[10px] text-muted-foreground">
-              Venta {mostrarCostos && `(+${porcentaje}%)`}
-            </span>
-            <span className="text-sm font-bold text-accent">{formatearPrecio(precioVenta)}</span>
-          </div>
         </div>
+      </div>
 
-        {/* Controles en una fila */}
-        <div className="flex items-center gap-1.5 mt-auto">
+      {/* Botonera abajo - sin scroll */}
+      <div className="shrink-0 p-2 border-t border-border bg-card/50">
+        <div className="flex flex-wrap items-center gap-1.5">
           {/* Cantidad */}
           <div className="flex items-center gap-0.5">
             <Button
@@ -139,7 +150,7 @@ export function ProductDetailPanel() {
               inputMode="numeric"
               value={cantidad}
               onChange={(e) => setCantidad(Math.max(1, parseInt(e.target.value) || 1))}
-              className="text-center font-semibold h-6 w-8 text-xs px-1 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              className="text-center font-semibold h-6 w-10 text-xs px-1 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             />
             <Button
               variant="outline"
@@ -170,7 +181,7 @@ export function ProductDetailPanel() {
           {/* Botón agregar */}
           <Button
             onClick={handleAgregarOActualizar}
-            className="flex-1 bg-accent hover:bg-accent/90 text-accent-foreground h-6 text-[10px]"
+            className="flex-1 bg-accent hover:bg-accent/90 text-accent-foreground h-6 text-[10px] min-w-[60px]"
           >
             {itemEnPedido ? 'Actualizar' : 'Agregar'}
           </Button>
@@ -186,13 +197,6 @@ export function ProductDetailPanel() {
             </Button>
           )}
         </div>
-
-        {/* Estado en pedido */}
-        {itemEnPedido && (
-          <div className="p-1 bg-accent/10 rounded text-[10px] mt-1.5">
-            <p className="font-medium text-accent">✓ En pedido: {itemEnPedido.cantidad} × {formatearPrecio(precioLista)}</p>
-          </div>
-        )}
       </div>
     </div>
   );
