@@ -4,7 +4,7 @@ import { Input } from './ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Button } from './ui/button';
 import { useAppStore } from '@/store/useAppStore';
-import { formatearPrecio } from '@/utils/pricing';
+import { formatearPrecio, calcularPrecioFinal } from '@/utils/pricing';
 import { cn } from '@/lib/utils';
 
 const ITEMS_PER_PAGE = 50;
@@ -21,7 +21,7 @@ export const setTableCategoryAndSubcategory = (cat: string, subcat: string) => {
 };
 
 export function ProductTable() {
-  const { productos, productoSeleccionado, setProductoSeleccionado } = useAppStore();
+  const { productos, productoSeleccionado, setProductoSeleccionado, mostrarCostos } = useAppStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('Todas');
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>('Todas');
@@ -173,10 +173,10 @@ export function ProductTable() {
           <table className="w-full text-xs">
             <thead className="sticky top-0 bg-[hsl(var(--table-header))] text-[hsl(var(--table-header-foreground))] z-10">
               <tr>
-                <th className="text-left px-2 py-1.5 font-semibold">Código</th>
+                <th className="text-left px-2 py-1.5 font-semibold w-[80px]">Código</th>
                 <th className="text-left px-2 py-1.5 font-semibold">Descripción</th>
-                <th className="text-left px-2 py-1.5 font-semibold">Marca</th>
-                <th className="text-right px-2 py-1.5 font-semibold">P. Lista</th>
+                <th className="text-left px-2 py-1.5 font-semibold w-[70px]">Marca</th>
+                <th className="text-right px-2 py-1.5 font-semibold w-[90px]">{mostrarCostos ? 'P. Lista' : 'P. Venta'}</th>
               </tr>
             </thead>
             <tbody>
@@ -193,14 +193,14 @@ export function ProductTable() {
                         : 'hover:bg-[hsl(var(--table-row-hover))]'
                     )}
                   >
-                    <td className="px-2 py-1.5 font-mono font-medium">
+                    <td className="px-2 py-1.5 font-mono font-medium w-[80px]">
                       {producto.codigo}
                     </td>
-                    <td className="px-2 py-1.5 truncate max-w-[200px]">
+                    <td className="px-2 py-1.5 truncate">
                       {producto.descripcion}
                     </td>
                     <td 
-                      className="px-2 py-1.5 text-muted-foreground hover:text-accent hover:underline cursor-pointer"
+                      className="px-2 py-1.5 text-muted-foreground hover:text-accent hover:underline cursor-pointer w-[70px]"
                       onClick={(e) => {
                         e.stopPropagation();
                         setSelectedMarca(producto.marca);
@@ -208,8 +208,8 @@ export function ProductTable() {
                     >
                       {producto.marca}
                     </td>
-                    <td className="px-2 py-1.5 text-right font-medium">
-                      {formatearPrecio(producto.precioCosto)}
+                    <td className="px-2 py-1.5 text-right font-medium w-[90px]">
+                      {formatearPrecio(mostrarCostos ? producto.precioCosto : calcularPrecioFinal(producto.precioCosto, 25))}
                     </td>
                   </tr>
                 );

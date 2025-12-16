@@ -47,13 +47,13 @@ const Index = () => {
       <div className="flex-1 flex flex-col overflow-hidden min-h-0">
         {/* Parte superior: Catálogo (tabla y detalle) */}
         <div className={`flex border-b border-border min-h-0 transition-all duration-300 ${orderExpanded ? 'flex-[55]' : 'flex-1'}`}>
-          {/* Tabla de productos - más ancha cuando pedido está colapsado */}
-          <div className={`border-r border-border overflow-hidden transition-all duration-300 ${orderExpanded ? 'w-[55%]' : 'w-[60%]'}`}>
+          {/* Tabla de productos - más ancha */}
+          <div className={`border-r border-border overflow-hidden transition-all duration-300 ${orderExpanded ? 'w-[65%]' : 'w-[68%]'}`}>
             <ProductTable />
           </div>
 
-          {/* Panel de detalle */}
-          <div className={`overflow-hidden transition-all duration-300 ${orderExpanded ? 'w-[45%]' : 'w-[40%]'}`}>
+          {/* Panel de detalle - más compacto */}
+          <div className={`overflow-hidden transition-all duration-300 ${orderExpanded ? 'w-[35%]' : 'w-[32%]'}`}>
             <ProductDetailPanel />
           </div>
         </div>
