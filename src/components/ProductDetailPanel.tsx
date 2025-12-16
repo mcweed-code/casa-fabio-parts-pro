@@ -119,7 +119,7 @@ export function ProductDetailPanel() {
             </Select>}
 
           {/* Botón agregar */}
-          <Button onClick={handleAgregarOActualizar} className="flex-1 bg-accent hover:bg-accent/90 text-accent-foreground h-6 text-[10px] min-w-[40px]">
+          <Button onClick={handleAgregarOActualizar} className="flex-1 bg-accent hover:bg-accent/90 text-accent-foreground h-6 text-[10px] min-w-[40px] mx-[10px]">
             {itemEnPedido ? 'Actualizar' : 'Agregar'}
           </Button>
 
