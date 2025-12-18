@@ -25,9 +25,9 @@ La aplicación estará disponible en `http://localhost:8080`
 
 Para reemplazar el logo de Casa Fabio:
 
-1. Navegá a `public/logo.svg`
+1. Navegá a `src/assets/logo.svg`
 2. Reemplazá el contenido con tu logo SVG personalizado
-3. El logo se muestra automáticamente en el header de la aplicación
+3. El logo se importa como módulo ES6 en el Header para máxima compatibilidad con builds de producción
 
 ### Catálogo de Productos
 
@@ -40,16 +40,6 @@ Para conectar con tu servidor de catálogo:
 
 ```typescript
 const CATALOG_URL = 'https://tu-servidor.com/api/catalogo.json';
-```
-
-3. Descomentá la línea en `src/components/Header.tsx`:
-
-```typescript
-// Cambiar de:
-const productos = mockCatalog;
-
-// A:
-const productos = await catalogService.fetchCatalogWithRetry();
 ```
 
 #### Formato del JSON
@@ -75,20 +65,35 @@ El servidor debe devolver un array de productos con esta estructura:
 
 ### Catálogo
 - ✅ Búsqueda por código y descripción
-- ✅ Filtro por categoría
-- ✅ Vista de detalle completa con imagen
-- ✅ Actualización desde servidor
+- ✅ Filtro por categoría, subcategoría y marca
+- ✅ Vista de detalle con imagen ampliable (lightbox)
+- ✅ Carga inicial con indicador de progreso
+- ✅ Indicador de última actualización
+- ✅ Tabla sin scroll horizontal con truncado de texto
+
+### Precios
+- ✅ Toggle para mostrar/ocultar precios de costo
+- ✅ Porcentaje de ganancia configurable (por defecto 25%)
+- ✅ Cálculo automático de precio de venta
 
 ### Pedidos
 - ✅ Gestión de pedidos con cliente y observaciones
 - ✅ Coeficiente global y específico por producto
 - ✅ Cálculo automático de precios y totales
 - ✅ Edición inline de items
+- ✅ Panel colapsable de resumen
 
 ### Exportación
+- ✅ Descarga Excel con productos filtrados
+- ✅ Excel incluye precio de venta con ganancia aplicada
 - ✅ Envío por WhatsApp Web
 - ✅ Impresión / PDF (usando impresión del navegador)
 - ✅ Guardado en localStorage
+
+### Imágenes
+- ✅ Lightbox para ver imágenes en tamaño completo
+- ✅ Manejo de imágenes rotas sin afectar otras
+- ✅ Placeholder para productos sin imagen
 
 ### Temas
 - ✅ Tema oscuro (por defecto)
@@ -104,6 +109,7 @@ El servidor debe devolver un array de productos con esta estructura:
 - **Tailwind CSS** - Estilos
 - **Shadcn/ui** - Componentes UI
 - **Lucide React** - Iconos
+- **xlsx** - Exportación a Excel
 
 ## 📦 Empaquetado para Escritorio
 
@@ -131,24 +137,28 @@ npm install --save-dev @tauri-apps/cli
 
 ```
 src/
+├── assets/              # Assets estáticos (logo.svg)
 ├── components/          # Componentes React
 │   ├── ui/             # Componentes base (shadcn)
-│   ├── Header.tsx
-│   ├── ProductTable.tsx
-│   ├── ProductDetailPanel.tsx
-│   └── OrderSummary.tsx
+│   ├── Header.tsx      # Header con logo, tema, exportación
+│   ├── ProductTable.tsx # Tabla de productos con filtros
+│   ├── ProductDetailPanel.tsx # Panel de detalle del producto
+│   ├── ImageLightbox.tsx # Visor de imágenes ampliadas
+│   ├── NavLink.tsx
+│   └── OrderSummary.tsx # Resumen del pedido
 ├── pages/              # Páginas
-│   └── Index.tsx
+│   └── Index.tsx       # Página principal con carga inicial
 ├── services/           # Servicios (API, catálogo)
 │   └── catalogService.ts
 ├── store/              # Estado global (Zustand)
-│   └── useAppStore.ts
+│   └── useAppStore.ts  # Store con productos, pedido, tema
 ├── types/              # Tipos TypeScript
 │   └── index.ts
 ├── utils/              # Utilidades
-│   ├── pricing.ts
-│   └── whatsapp.ts
-└── index.css           # Sistema de diseño
+│   ├── pricing.ts      # Cálculos de precios
+│   ├── exportacion.ts  # Exportación a Excel
+│   └── whatsapp.ts     # Generación de mensaje WhatsApp
+└── index.css           # Sistema de diseño (tokens CSS)
 ```
 
 ## 🎨 Sistema de Diseño
@@ -162,6 +172,16 @@ Los colores y estilos están centralizados en:
 - **Primario**: `#18202e` - Fondo oscuro principal
 - **Secundario**: `#fdfdfd` - Fondos claros
 - **Acento**: `#dc2626` - Rojo para CTAs y destacados
+
+## 📋 Especificaciones de la Tabla
+
+La tabla de productos está optimizada para los siguientes límites de caracteres:
+- **Código**: máximo 16 caracteres (100px)
+- **Descripción**: máximo 88 caracteres (flexible, con truncado)
+- **Marca**: máximo 14 caracteres (80px)
+- **Precio**: máximo 11 caracteres (85px)
+
+El texto que exceda estos límites se trunca con puntos suspensivos (...) y muestra el texto completo en tooltip al pasar el mouse.
 
 ## 📄 Licencia
 

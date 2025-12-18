@@ -178,19 +178,25 @@ export function ProductTable({ onFilteredProductsChange }: ProductTableProps) {
       </div>
 
       {/* Tabla */}
-      <div className="flex-1 overflow-auto min-h-0">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0">
         {productosFiltrados.length === 0 ? (
           <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
             No se encontraron productos
           </div>
         ) : (
-          <table className="w-full text-xs">
+          <table className="w-full text-xs table-fixed">
+            <colgroup>
+              <col className="w-[100px]" />
+              <col />
+              <col className="w-[80px]" />
+              <col className="w-[85px]" />
+            </colgroup>
             <thead className="sticky top-0 bg-[hsl(var(--table-header))] text-[hsl(var(--table-header-foreground))] z-10">
               <tr>
-                <th className="text-left px-2 py-1.5 font-semibold w-[80px]">Código</th>
+                <th className="text-left px-2 py-1.5 font-semibold">Código</th>
                 <th className="text-left px-2 py-1.5 font-semibold">Descripción</th>
-                <th className="text-left px-2 py-1.5 font-semibold w-[70px]">Marca</th>
-                <th className="text-right px-2 py-1.5 font-semibold w-[90px]">{mostrarCostos ? 'P. Lista' : 'P. Venta'}</th>
+                <th className="text-left px-2 py-1.5 font-semibold">Marca</th>
+                <th className="text-right px-2 py-1.5 font-semibold">{mostrarCostos ? 'P. Lista' : 'P. Venta'}</th>
               </tr>
             </thead>
             <tbody>
@@ -207,22 +213,23 @@ export function ProductTable({ onFilteredProductsChange }: ProductTableProps) {
                         : 'hover:bg-[hsl(var(--table-row-hover))]'
                     )}
                   >
-                    <td className="px-2 py-1.5 font-mono font-medium w-[80px]">
+                    <td className="px-2 py-1.5 font-mono font-medium truncate" title={producto.codigo}>
                       {producto.codigo}
                     </td>
-                    <td className="px-2 py-1.5 truncate">
+                    <td className="px-2 py-1.5 truncate" title={producto.descripcion}>
                       {producto.descripcion}
                     </td>
                     <td 
-                      className="px-2 py-1.5 text-muted-foreground hover:text-accent hover:underline cursor-pointer w-[70px]"
+                      className="px-2 py-1.5 text-muted-foreground hover:text-accent hover:underline cursor-pointer truncate"
                       onClick={(e) => {
                         e.stopPropagation();
                         setSelectedMarca(producto.marca);
                       }}
+                      title={producto.marca}
                     >
                       {producto.marca}
                     </td>
-                    <td className="px-2 py-1.5 text-right font-medium w-[90px]">
+                    <td className="px-2 py-1.5 text-right font-medium">
                       {formatearPrecio(mostrarCostos ? producto.precioCosto : calcularPrecioFinal(producto.precioCosto, 25))}
                     </td>
                   </tr>
