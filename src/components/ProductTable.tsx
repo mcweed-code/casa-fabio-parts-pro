@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Search, X } from 'lucide-react';
 import { Input } from './ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
@@ -6,12 +6,14 @@ import { Button } from './ui/button';
 import { useAppStore } from '@/store/useAppStore';
 import { formatearPrecio, calcularPrecioFinal } from '@/utils/pricing';
 import { cn } from '@/lib/utils';
+import { Producto } from '@/types';
 
 const ITEMS_PER_PAGE = 50;
 
-// Exportar setters para uso externo
+// Exportar setters y getters para uso externo
 let externalSetCategory: ((cat: string) => void) | null = null;
 let externalSetSubcategory: ((subcat: string) => void) | null = null;
+let externalGetFilteredProducts: (() => Producto[]) | null = null;
 
 export const setTableCategory = (cat: string) => externalSetCategory?.(cat);
 export const setTableSubcategory = (subcat: string) => externalSetSubcategory?.(subcat);
@@ -19,8 +21,13 @@ export const setTableCategoryAndSubcategory = (cat: string, subcat: string) => {
   externalSetCategory?.(cat);
   setTimeout(() => externalSetSubcategory?.(subcat), 0);
 };
+export const getFilteredProducts = () => externalGetFilteredProducts?.() || [];
 
-export function ProductTable() {
+interface ProductTableProps {
+  onFilteredProductsChange?: (productos: Producto[]) => void;
+}
+
+export function ProductTable({ onFilteredProductsChange }: ProductTableProps) {
   const { productos, productoSeleccionado, setProductoSeleccionado, mostrarCostos } = useAppStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('Todas');
@@ -81,6 +88,13 @@ export function ProductTable() {
       return matchSearch && matchCategory && matchSubcategory && matchMarca;
     });
   }, [productos, searchTerm, selectedCategory, selectedSubcategory, selectedMarca]);
+
+  // Exponer getter y notificar cambios
+  externalGetFilteredProducts = () => productosFiltrados;
+  
+  useEffect(() => {
+    onFilteredProductsChange?.(productosFiltrados);
+  }, [productosFiltrados, onFilteredProductsChange]);
 
   // Paginación
   const totalPages = Math.ceil(productosFiltrados.length / ITEMS_PER_PAGE);

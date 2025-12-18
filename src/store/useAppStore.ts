@@ -13,10 +13,12 @@ interface AppState {
   productoSeleccionado: Producto | null;
   catalogoLoading: boolean;
   catalogoError: string | null;
+  ultimaActualizacion: string | null;
   setCatalogo: (productos: Producto[]) => void;
   setProductoSeleccionado: (producto: Producto | null) => void;
   setCatalogoLoading: (loading: boolean) => void;
   setCatalogoError: (error: string | null) => void;
+  setUltimaActualizacion: (fecha: string) => void;
 
   // Pedido actual
   pedidoActual: Pedido;
@@ -50,8 +52,9 @@ export const useAppStore = create<AppState>()(
       theme: 'dark', // Dark por defecto según requerimiento
       productos: [],
       productoSeleccionado: null,
-      catalogoLoading: false,
+      catalogoLoading: true, // Empieza en true para mostrar loading
       catalogoError: null,
+      ultimaActualizacion: null,
       pedidoActual: crearPedidoVacio(),
       pedidosGuardados: [],
       mostrarCostos: true,
@@ -73,6 +76,7 @@ export const useAppStore = create<AppState>()(
       setProductoSeleccionado: (producto) => set({ productoSeleccionado: producto }),
       setCatalogoLoading: (loading) => set({ catalogoLoading: loading }),
       setCatalogoError: (error) => set({ catalogoError: error }),
+      setUltimaActualizacion: (fecha) => set({ ultimaActualizacion: fecha }),
 
       // Pedido
       toggleMostrarCostos: () => set((state) => ({ mostrarCostos: !state.mostrarCostos })),
