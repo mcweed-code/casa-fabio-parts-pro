@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -13,6 +13,11 @@ export function ImageLightbox({ src, alt, className, fallback }: ImageLightboxPr
   const [isOpen, setIsOpen] = useState(false);
   const [hasError, setHasError] = useState(false);
 
+  // Reset error state when src changes
+  useEffect(() => {
+    setHasError(false);
+  }, [src]);
+
   if (hasError && fallback) {
     return <>{fallback}</>;
   }
@@ -23,11 +28,11 @@ export function ImageLightbox({ src, alt, className, fallback }: ImageLightboxPr
         src={src}
         alt={alt}
         className={cn('cursor-pointer hover:opacity-90 transition-opacity', className)}
-        onClick={() => setIsOpen(true)}
+        onClick={() => !hasError && setIsOpen(true)}
         onError={() => setHasError(true)}
       />
 
-      {isOpen && (
+      {isOpen && !hasError && (
         <div 
           className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
           onClick={() => setIsOpen(false)}
@@ -43,6 +48,10 @@ export function ImageLightbox({ src, alt, className, fallback }: ImageLightboxPr
             alt={alt}
             className="max-w-full max-h-full object-contain"
             onClick={(e) => e.stopPropagation()}
+            onError={() => {
+              setHasError(true);
+              setIsOpen(false);
+            }}
           />
         </div>
       )}

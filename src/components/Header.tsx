@@ -3,17 +3,28 @@ import { Button } from './ui/button';
 import { useAppStore } from '@/store/useAppStore';
 import { descargarExcelProductos } from '@/utils/exportacion';
 import { useToast } from '@/hooks/use-toast';
+import logoSvg from '@/assets/logo.svg';
+import { Producto } from '@/types';
 
-export function Header() {
+interface HeaderProps {
+  productosFiltrados?: Producto[];
+  porcentajeGanancia?: number;
+}
+
+export function Header({ productosFiltrados, porcentajeGanancia = 25 }: HeaderProps) {
   const { theme, toggleTheme, productos } = useAppStore();
   const { toast } = useToast();
 
   const handleExportarExcel = () => {
     const fecha = new Date().toISOString().split('T')[0];
-    descargarExcelProductos(productos, `lista-precios-casa-fabio-${fecha}.xlsx`);
+    // Usar productos filtrados si están disponibles, si no, todos
+    const productosExportar = productosFiltrados && productosFiltrados.length > 0 
+      ? productosFiltrados 
+      : productos;
+    descargarExcelProductos(productosExportar, `lista-precios-casa-fabio-${fecha}.xlsx`, porcentajeGanancia);
     toast({
       title: 'Lista exportada',
-      description: 'La lista de precios se descargó correctamente en formato Excel.',
+      description: `Se exportaron ${productosExportar.length} productos con ${porcentajeGanancia}% de ganancia.`,
     });
   };
 
@@ -28,10 +39,10 @@ export function Header() {
   return (
     <header className="border-b border-border bg-card sticky top-0 z-50 shadow-md">
       <div className="container mx-auto px-3 h-10 flex items-center justify-between">
-        {/* Logo más grande */}
+        {/* Logo importado como módulo */}
         <div className="flex items-center">
           <img 
-            src="/logo.svg" 
+            src={logoSvg} 
             alt="Casa Fabio" 
             className="h-9 w-auto"
           />

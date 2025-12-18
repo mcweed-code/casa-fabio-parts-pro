@@ -3,20 +3,23 @@
  */
 
 import { Producto } from '@/types';
+import { calcularPrecioFinal } from '@/utils/pricing';
 import * as XLSX from 'xlsx';
 
 /**
  * Genera y descarga un archivo Excel con la lista de productos
+ * Incluye precio con ganancia aplicada
  */
-export function descargarExcelProductos(productos: Producto[], nombreArchivo: string) {
+export function descargarExcelProductos(productos: Producto[], nombreArchivo: string, porcentajeGanancia: number = 25) {
   const datos = productos.map(p => ({
     'Código': p.codigo,
     'Descripción': p.descripcion,
     'Categoría': p.categoria,
     'Subcategoría': p.subcategoria,
     'Marca': p.marca,
-    'Precio Distribuidor': p.precioCosto,
-    'Precio Lista': p.precioLista
+    'Precio Lista': p.precioCosto,
+    'Ganancia (%)': porcentajeGanancia,
+    'Precio Venta': calcularPrecioFinal(p.precioCosto, porcentajeGanancia)
   }));
 
   const worksheet = XLSX.utils.json_to_sheet(datos);
@@ -30,8 +33,9 @@ export function descargarExcelProductos(productos: Producto[], nombreArchivo: st
     { wch: 15 }, // Categoría
     { wch: 15 }, // Subcategoría
     { wch: 15 }, // Marca
-    { wch: 18 }, // Precio Distribuidor
     { wch: 15 }, // Precio Lista
+    { wch: 12 }, // Ganancia (%)
+    { wch: 15 }, // Precio Venta
   ];
   worksheet['!cols'] = colWidths;
 

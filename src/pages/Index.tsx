@@ -1,47 +1,94 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
+import { Loader2, RefreshCw } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { ProductTable } from '@/components/ProductTable';
 import { ProductDetailPanel } from '@/components/ProductDetailPanel';
 import { OrderSummary } from '@/components/OrderSummary';
 import { useAppStore } from '@/store/useAppStore';
 import { mockCatalog, catalogService } from '@/services/catalogService';
+import { Producto } from '@/types';
 
 const AUTO_REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutos
 
 const Index = () => {
-  const { productos, setCatalogo, theme, setCatalogoLoading } = useAppStore();
+  const { 
+    productos, 
+    setCatalogo, 
+    theme, 
+    setCatalogoLoading, 
+    catalogoLoading,
+    ultimaActualizacion,
+    setUltimaActualizacion 
+  } = useAppStore();
   const [orderExpanded, setOrderExpanded] = useState(false);
+  const [productosFiltrados, setProductosFiltrados] = useState<Producto[]>([]);
+  const [porcentajeGanancia] = useState(25); // Puede hacerse configurable
 
-  // Cargar catálogo inicial, aplicar tema y configurar auto-refresh
+  // Función para cargar catálogo
+  const cargarCatalogo = useCallback(async () => {
+    try {
+      setCatalogoLoading(true);
+      // En producción, usar: const productos = await catalogService.fetchCatalogWithRetry();
+      // Simular delay de carga para desarrollo
+      await new Promise(resolve => setTimeout(resolve, 500));
+      const productosData = mockCatalog;
+      setCatalogo(productosData);
+      setUltimaActualizacion(new Date().toISOString());
+    } catch (error) {
+      console.error('Error al cargar catálogo:', error);
+    } finally {
+      setCatalogoLoading(false);
+    }
+  }, [setCatalogo, setCatalogoLoading, setUltimaActualizacion]);
+
+  // Cargar catálogo inicial y aplicar tema
   useEffect(() => {
     // Aplicar tema inicial
     document.documentElement.classList.toggle('dark', theme === 'dark');
 
-    // Cargar catálogo si está vacío
+    // Cargar catálogo al iniciar si está vacío
     if (productos.length === 0) {
-      setCatalogo(mockCatalog);
+      cargarCatalogo();
+    } else {
+      setCatalogoLoading(false);
     }
 
     // Auto-refresh del catálogo cada 5 minutos
-    const interval = setInterval(async () => {
-      try {
-        setCatalogoLoading(true);
-        // En producción, usar: const productos = await catalogService.fetchCatalogWithRetry();
-        const productos = mockCatalog;
-        setCatalogo(productos);
-      } catch (error) {
-        console.error('Error al actualizar catálogo automáticamente', error);
-      } finally {
-        setCatalogoLoading(false);
-      }
-    }, AUTO_REFRESH_INTERVAL);
+    const interval = setInterval(cargarCatalogo, AUTO_REFRESH_INTERVAL);
 
     return () => clearInterval(interval);
-  }, [theme, productos.length, setCatalogo, setCatalogoLoading]);
+  }, [theme, productos.length, cargarCatalogo, setCatalogoLoading]);
+
+  // Formatear fecha de última actualización
+  const formatUltimaActualizacion = () => {
+    if (!ultimaActualizacion) return '';
+    const fecha = new Date(ultimaActualizacion);
+    return fecha.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+  };
+
+  // Mostrar loading mientras carga
+  if (catalogoLoading && productos.length === 0) {
+    return (
+      <div className="h-screen flex flex-col items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-accent mb-4" />
+        <p className="text-sm text-muted-foreground">Cargando catálogo...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen max-h-screen flex flex-col bg-background overflow-hidden">
-      <Header />
+      <Header productosFiltrados={productosFiltrados} porcentajeGanancia={porcentajeGanancia} />
+      
+      {/* Indicador de última actualización */}
+      {ultimaActualizacion && (
+        <div className="px-3 py-0.5 bg-muted/50 border-b border-border flex items-center justify-end gap-1">
+          <RefreshCw className={`h-2.5 w-2.5 text-muted-foreground ${catalogoLoading ? 'animate-spin' : ''}`} />
+          <span className="text-[10px] text-muted-foreground">
+            Actualizado: {formatUltimaActualizacion()}
+          </span>
+        </div>
+      )}
       
       {/* Layout adaptable */}
       <div className="flex-1 flex flex-col overflow-hidden min-h-0">
@@ -49,7 +96,7 @@ const Index = () => {
         <div className={`flex border-b border-border min-h-0 transition-all duration-300 ${orderExpanded ? 'flex-[55]' : 'flex-1'}`}>
           {/* Tabla de productos - más ancha */}
           <div className={`border-r border-border overflow-hidden transition-all duration-300 ${orderExpanded ? 'w-[65%]' : 'w-[68%]'}`}>
-            <ProductTable />
+            <ProductTable onFilteredProductsChange={setProductosFiltrados} />
           </div>
 
           {/* Panel de detalle - más compacto */}
