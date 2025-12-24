@@ -1,6 +1,6 @@
 # Casa Fabio - Sistema de Gestión de Pedidos
 
-Sistema de escritorio para distribuidora de autopartes desarrollado con React + TypeScript + Vite.
+Sistema de escritorio para distribuidora de autopartes desarrollado con React + TypeScript + Vite + Lovable Cloud.
 
 ## 🚀 Inicio Rápido
 
@@ -18,6 +18,24 @@ npm run build
 ```
 
 La aplicación estará disponible en `http://localhost:8080`
+
+## 🔐 Autenticación y Configuración
+
+### Flujo de Usuario
+
+1. **Registro/Login**: El usuario se registra o inicia sesión en `/auth`
+2. **Setup Inicial**: Al primer ingreso, completa un wizard de configuración en `/setup`:
+   - Datos del cliente (razón social, CUIT, teléfono, dirección)
+   - Coeficientes de ganancia por categoría
+3. **Acceso Completo**: Una vez configurado, accede al catálogo y funcionalidades
+
+### Páginas Disponibles
+
+- `/auth` - Registro e inicio de sesión
+- `/setup` - Wizard de configuración inicial
+- `/` - Catálogo principal de productos
+- `/cliente` - Gestión de perfil y coeficientes
+- `/catalogos` - Descarga de catálogos PDF
 
 ## 🎨 Personalización
 
@@ -63,6 +81,12 @@ El servidor debe devolver un array de productos con esta estructura:
 
 ## 📱 Funcionalidades
 
+### Autenticación
+- ✅ Registro con email y contraseña
+- ✅ Inicio de sesión
+- ✅ Perfil de cliente persistente
+- ✅ Wizard de configuración inicial
+
 ### Catálogo
 - ✅ Búsqueda por código y descripción
 - ✅ Filtro por categoría, subcategoría y marca
@@ -71,10 +95,16 @@ El servidor debe devolver un array de productos con esta estructura:
 - ✅ Indicador de última actualización
 - ✅ Tabla sin scroll horizontal con truncado de texto
 
-### Precios
+### Precios y Coeficientes
+- ✅ Coeficientes de ganancia personalizables por categoría
+- ✅ Coeficiente general para categorías no definidas
+- ✅ Cálculo automático de precio de venta según coeficientes
 - ✅ Toggle para mostrar/ocultar precios de costo
-- ✅ Porcentaje de ganancia configurable (por defecto 25%)
-- ✅ Cálculo automático de precio de venta
+
+### Catálogos PDF
+- ✅ Listado de catálogos disponibles
+- ✅ Descarga directa de PDFs
+- ✅ Vista previa integrada
 
 ### Pedidos
 - ✅ Gestión de pedidos con cliente y observaciones
@@ -87,8 +117,8 @@ El servidor debe devolver un array de productos con esta estructura:
 - ✅ Descarga Excel con productos filtrados
 - ✅ Excel incluye precio de venta con ganancia aplicada
 - ✅ Envío por WhatsApp Web
-- ✅ Impresión / PDF (usando impresión del navegador)
-- ✅ Guardado en localStorage
+- ✅ Generación de PDF de pedido
+- ✅ Guardado en base de datos
 
 ### Imágenes
 - ✅ Lightbox para ver imágenes en tamaño completo
@@ -109,7 +139,19 @@ El servidor debe devolver un array de productos con esta estructura:
 - **Tailwind CSS** - Estilos
 - **Shadcn/ui** - Componentes UI
 - **Lucide React** - Iconos
+- **Lovable Cloud** - Backend (autenticación, base de datos, storage)
+- **jsPDF** - Generación de PDFs
 - **xlsx** - Exportación a Excel
+
+## 🗄️ Base de Datos
+
+### Tablas Principales
+
+- **client_profiles** - Perfiles de clientes (razón social, CUIT, contacto)
+- **client_coefficients** - Coeficientes de ganancia por categoría
+- **pdf_catalogs** - Catálogos PDF disponibles para descarga
+- **saved_orders** - Pedidos guardados
+- **app_settings** - Configuración global (WhatsApp empresa)
 
 ## 📦 Empaquetado para Escritorio
 
@@ -140,14 +182,21 @@ src/
 ├── assets/              # Assets estáticos (logo.svg)
 ├── components/          # Componentes React
 │   ├── ui/             # Componentes base (shadcn)
-│   ├── Header.tsx      # Header con logo, tema, exportación
+│   ├── AppHeader.tsx   # Header con navegación y tema
+│   ├── AppLayout.tsx   # Layout principal
 │   ├── ProductTable.tsx # Tabla de productos con filtros
 │   ├── ProductDetailPanel.tsx # Panel de detalle del producto
 │   ├── ImageLightbox.tsx # Visor de imágenes ampliadas
 │   ├── NavLink.tsx
 │   └── OrderSummary.tsx # Resumen del pedido
+├── hooks/              # Hooks personalizados
+│   └── useAuth.tsx     # Hook de autenticación
 ├── pages/              # Páginas
-│   └── Index.tsx       # Página principal con carga inicial
+│   ├── Auth.tsx        # Login/Registro
+│   ├── Setup.tsx       # Wizard de configuración
+│   ├── Index.tsx       # Catálogo principal
+│   ├── Cliente.tsx     # Perfil del cliente
+│   └── Catalogos.tsx   # Catálogos PDF
 ├── services/           # Servicios (API, catálogo)
 │   └── catalogService.ts
 ├── store/              # Estado global (Zustand)
@@ -156,6 +205,8 @@ src/
 │   └── index.ts
 ├── utils/              # Utilidades
 │   ├── pricing.ts      # Cálculos de precios
+│   ├── coefficients.ts # Manejo de coeficientes
+│   ├── pdfGenerator.ts # Generación de PDFs
 │   ├── exportacion.ts  # Exportación a Excel
 │   └── whatsapp.ts     # Generación de mensaje WhatsApp
 └── index.css           # Sistema de diseño (tokens CSS)
