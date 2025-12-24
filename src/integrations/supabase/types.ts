@@ -14,7 +14,159 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      app_settings: {
+        Row: {
+          id: string
+          key: string
+          updated_at: string | null
+          value: string
+        }
+        Insert: {
+          id?: string
+          key: string
+          updated_at?: string | null
+          value: string
+        }
+        Update: {
+          id?: string
+          key?: string
+          updated_at?: string | null
+          value?: string
+        }
+        Relationships: []
+      }
+      client_coefficients: {
+        Row: {
+          category_coefs: Json | null
+          created_at: string | null
+          general_coef: number
+          id: string
+          mode: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          category_coefs?: Json | null
+          created_at?: string | null
+          general_coef?: number
+          id?: string
+          mode?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          category_coefs?: Json | null
+          created_at?: string | null
+          general_coef?: number
+          id?: string
+          mode?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      client_profiles: {
+        Row: {
+          created_at: string | null
+          cuit_dni: string
+          direccion: string | null
+          email: string
+          email_verified: boolean | null
+          id: string
+          razon_social: string
+          setup_completed: boolean | null
+          updated_at: string | null
+          user_id: string
+          whatsapp: string
+          whatsapp_verified: boolean | null
+        }
+        Insert: {
+          created_at?: string | null
+          cuit_dni: string
+          direccion?: string | null
+          email: string
+          email_verified?: boolean | null
+          id?: string
+          razon_social: string
+          setup_completed?: boolean | null
+          updated_at?: string | null
+          user_id: string
+          whatsapp: string
+          whatsapp_verified?: boolean | null
+        }
+        Update: {
+          created_at?: string | null
+          cuit_dni?: string
+          direccion?: string | null
+          email?: string
+          email_verified?: boolean | null
+          id?: string
+          razon_social?: string
+          setup_completed?: boolean | null
+          updated_at?: string | null
+          user_id?: string
+          whatsapp?: string
+          whatsapp_verified?: boolean | null
+        }
+        Relationships: []
+      }
+      pdf_catalogs: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          enabled: boolean | null
+          file_url: string
+          id: string
+          title: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          enabled?: boolean | null
+          file_url: string
+          id?: string
+          title: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          enabled?: boolean | null
+          file_url?: string
+          id?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      saved_orders: {
+        Row: {
+          created_at: string | null
+          id: string
+          order_data: Json
+          pdf_url: string | null
+          total: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          order_data: Json
+          pdf_url?: string | null
+          total: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          order_data?: Json
+          pdf_url?: string | null
+          total?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
