@@ -4,7 +4,9 @@ import { Input } from './ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Button } from './ui/button';
 import { useAppStore } from '@/store/useAppStore';
-import { formatearPrecio, calcularPrecioFinal } from '@/utils/pricing';
+import { useAuth, ClientCoefficients } from '@/hooks/useAuth';
+import { formatearPrecio } from '@/utils/pricing';
+import { getEffectiveFactor, calcularPrecioVenta } from '@/utils/coefficientHelpers';
 import { cn } from '@/lib/utils';
 import { Producto } from '@/types';
 
@@ -29,6 +31,7 @@ interface ProductTableProps {
 
 export function ProductTable({ onFilteredProductsChange }: ProductTableProps) {
   const { productos, productoSeleccionado, setProductoSeleccionado, mostrarCostos } = useAppStore();
+  const { coefficients } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('Todas');
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>('Todas');
@@ -39,6 +42,7 @@ export function ProductTable({ onFilteredProductsChange }: ProductTableProps) {
   externalSetCategory = (cat: string) => {
     setSelectedCategory(cat);
     setSelectedSubcategory('Todas');
+    setSelectedMarca('Todas');
   };
   externalSetSubcategory = setSelectedSubcategory;
 
@@ -50,12 +54,13 @@ export function ProductTable({ onFilteredProductsChange }: ProductTableProps) {
     setCurrentPage(1);
   };
 
-  // Obtener categorías, subcategorías y marcas únicas
+  // Obtener categorías únicas
   const categorias = useMemo(() => {
     const cats = new Set(productos.map((p) => p.categoria));
     return ['Todas', ...Array.from(cats)];
   }, [productos]);
 
+  // Subcategorías filtradas por categoría
   const subcategorias = useMemo(() => {
     const filtered = selectedCategory === 'Todas' 
       ? productos 
@@ -64,10 +69,26 @@ export function ProductTable({ onFilteredProductsChange }: ProductTableProps) {
     return ['Todas', ...Array.from(subs)];
   }, [productos, selectedCategory]);
 
+  // MARCAS FILTRADAS POR SUBCATEGORÍA (o categoría si no hay subcat)
   const marcas = useMemo(() => {
-    const marks = new Set(productos.map((p) => p.marca));
+    let filtered = productos;
+    
+    if (selectedSubcategory !== 'Todas') {
+      filtered = productos.filter(p => p.subcategoria === selectedSubcategory);
+    } else if (selectedCategory !== 'Todas') {
+      filtered = productos.filter(p => p.categoria === selectedCategory);
+    }
+    
+    const marks = new Set(filtered.map((p) => p.marca));
     return ['Todas', ...Array.from(marks)];
-  }, [productos]);
+  }, [productos, selectedCategory, selectedSubcategory]);
+
+  // Limpiar marca si ya no pertenece a la subcategoría seleccionada
+  useEffect(() => {
+    if (selectedMarca !== 'Todas' && !marcas.includes(selectedMarca)) {
+      setSelectedMarca('Todas');
+    }
+  }, [marcas, selectedMarca]);
 
   // Filtrar productos
   const productosFiltrados = useMemo(() => {
@@ -107,6 +128,15 @@ export function ProductTable({ onFilteredProductsChange }: ProductTableProps) {
     setCurrentPage(1);
   }, [searchTerm, selectedCategory, selectedSubcategory, selectedMarca]);
 
+  // Función para obtener precio de venta usando coeficientes
+  const getPrecioVenta = (producto: Producto): number => {
+    const factor = getEffectiveFactor(
+      coefficients as { mode: 'general' | 'by_subcategory'; general_coef: number; subcategory_coefs: Record<string, number> } | null,
+      producto.subcategoria
+    );
+    return calcularPrecioVenta(producto.precioCosto, factor);
+  };
+
   return (
     <div className="flex flex-col h-full overflow-hidden">
       {/* Filtros compactos */}
@@ -136,6 +166,7 @@ export function ProductTable({ onFilteredProductsChange }: ProductTableProps) {
           <Select value={selectedCategory} onValueChange={(value) => {
             setSelectedCategory(value);
             setSelectedSubcategory('Todas');
+            setSelectedMarca('Todas');
           }}>
             <SelectTrigger className="h-7 text-xs">
               <SelectValue placeholder="Categoría" />
@@ -149,7 +180,11 @@ export function ProductTable({ onFilteredProductsChange }: ProductTableProps) {
             </SelectContent>
           </Select>
 
-          <Select value={selectedSubcategory} onValueChange={setSelectedSubcategory}>
+          <Select value={selectedSubcategory} onValueChange={(value) => {
+            setSelectedSubcategory(value);
+            // Limpiar marca si cambia subcategoría
+            setSelectedMarca('Todas');
+          }}>
             <SelectTrigger className="h-7 text-xs">
               <SelectValue placeholder="Subcategoría" />
             </SelectTrigger>
@@ -202,6 +237,10 @@ export function ProductTable({ onFilteredProductsChange }: ProductTableProps) {
             <tbody>
               {productosPaginados.map((producto) => {
                 const isSelected = productoSeleccionado?.codigo === producto.codigo;
+                const precioMostrar = mostrarCostos 
+                  ? producto.precioCosto 
+                  : getPrecioVenta(producto);
+                  
                 return (
                   <tr
                     key={producto.codigo}
@@ -230,7 +269,7 @@ export function ProductTable({ onFilteredProductsChange }: ProductTableProps) {
                       {producto.marca}
                     </td>
                     <td className="px-2 py-1.5 text-right font-medium">
-                      {formatearPrecio(mostrarCostos ? producto.precioCosto : calcularPrecioFinal(producto.precioCosto, 25))}
+                      {formatearPrecio(precioMostrar)}
                     </td>
                   </tr>
                 );
