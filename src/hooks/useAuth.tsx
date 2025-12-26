@@ -2,9 +2,10 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
-interface ClientProfile {
+export interface ClientProfile {
   id: string;
   user_id: string;
+  numero_cliente: string | null;
   razon_social: string;
   cuit_dni: string;
   email: string;
@@ -15,12 +16,12 @@ interface ClientProfile {
   setup_completed: boolean;
 }
 
-interface ClientCoefficients {
+export interface ClientCoefficients {
   id: string;
   user_id: string;
-  mode: 'general' | 'by_category';
+  mode: 'general' | 'by_subcategory';
   general_coef: number;
-  category_coefs: Record<string, number>;
+  subcategory_coefs: Record<string, number>;
 }
 
 interface AuthContextType {
