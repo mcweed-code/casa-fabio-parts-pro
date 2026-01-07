@@ -37,29 +37,29 @@ export type Database = {
       }
       client_coefficients: {
         Row: {
+          category_coefs: Json | null
           created_at: string | null
           general_coef: number
           id: string
           mode: string
-          subcategory_coefs: Json | null
           updated_at: string | null
           user_id: string
         }
         Insert: {
+          category_coefs?: Json | null
           created_at?: string | null
           general_coef?: number
           id?: string
           mode?: string
-          subcategory_coefs?: Json | null
           updated_at?: string | null
           user_id: string
         }
         Update: {
+          category_coefs?: Json | null
           created_at?: string | null
           general_coef?: number
           id?: string
           mode?: string
-          subcategory_coefs?: Json | null
           updated_at?: string | null
           user_id?: string
         }
@@ -73,7 +73,6 @@ export type Database = {
           email: string
           email_verified: boolean | null
           id: string
-          numero_cliente: string | null
           razon_social: string
           setup_completed: boolean | null
           updated_at: string | null
@@ -88,7 +87,6 @@ export type Database = {
           email: string
           email_verified?: boolean | null
           id?: string
-          numero_cliente?: string | null
           razon_social: string
           setup_completed?: boolean | null
           updated_at?: string | null
@@ -103,7 +101,6 @@ export type Database = {
           email?: string
           email_verified?: boolean | null
           id?: string
-          numero_cliente?: string | null
           razon_social?: string
           setup_completed?: boolean | null
           updated_at?: string | null

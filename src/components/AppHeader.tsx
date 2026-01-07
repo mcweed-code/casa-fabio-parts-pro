@@ -1,75 +1,117 @@
-import { NavLink, useLocation } from 'react-router-dom';
-import { Moon, Sun, Home, User, FileText } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Moon, Sun, Home, User, FileText, LogOut, Settings } from 'lucide-react';
 import { Button } from './ui/button';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import { useAppStore } from '@/store/useAppStore';
+import { useAuth } from '@/hooks/useAuth';
 import logoSvg from '@/assets/logo.svg';
 
 export function AppHeader() {
   const { theme, toggleTheme } = useAppStore();
+  const { signOut, profile } = useAuth();
+  const navigate = useNavigate();
   const location = useLocation();
 
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/auth');
+  };
+
   const navItems = [
-    { path: '/', icon: Home, label: 'Inicio' },
-    { path: '/cliente', icon: User, label: 'Mis Datos' },
-    { path: '/catalogos', icon: FileText, label: 'Catálogos' },
+    { path: '/', label: 'Inicio', icon: Home },
+    { path: '/cliente', label: 'Mis Datos', icon: User },
+    { path: '/catalogos', label: 'Catálogos', icon: FileText },
   ];
 
   return (
-    <TooltipProvider>
-      <header className="h-10 border-b border-border bg-card/80 backdrop-blur-sm shrink-0 flex items-center px-3">
-        {/* Logo a la izquierda */}
-        <NavLink to="/" className="flex items-center gap-2 shrink-0">
-          <img src={logoSvg} alt="Casa Fabio" className="h-6" />
-        </NavLink>
+    <header className="border-b border-border bg-card sticky top-0 z-50 shadow-md">
+      <div className="container mx-auto px-3 h-12 flex items-center justify-between">
+        {/* Logo */}
+        <div className="flex items-center gap-4">
+          <img
+            src={logoSvg}
+            alt="Casa Fabio"
+            className="h-9 w-auto cursor-pointer"
+            onClick={() => navigate('/')}
+          />
+          
+          {/* Navigation */}
+          <nav className="hidden md:flex items-center gap-1">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = location.pathname === item.path;
+              return (
+                <Button
+                  key={item.path}
+                  variant={isActive ? 'secondary' : 'ghost'}
+                  size="sm"
+                  onClick={() => navigate(item.path)}
+                  className="gap-1.5 h-8 text-xs"
+                >
+                  <Icon className="h-3.5 w-3.5" />
+                  {item.label}
+                </Button>
+              );
+            })}
+          </nav>
+        </div>
 
-        {/* Spacer */}
-        <div className="flex-1" />
+        {/* Right side */}
+        <div className="flex items-center gap-2">
+          {/* User info (mobile hidden) */}
+          {profile && (
+            <span className="hidden lg:block text-xs text-muted-foreground max-w-32 truncate">
+              {profile.razon_social}
+            </span>
+          )}
+          
+          {/* Theme toggle */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleTheme}
+            className="h-8 w-8"
+          >
+            {theme === 'dark' ? (
+              <Sun className="h-4 w-4" />
+            ) : (
+              <Moon className="h-4 w-4" />
+            )}
+          </Button>
 
-        {/* Navegación y controles a la derecha */}
-        <nav className="flex items-center gap-1">
-          {navItems.map(({ path, icon: Icon, label }) => (
-            <Tooltip key={path}>
-              <TooltipTrigger asChild>
-                <NavLink to={path}>
-                  <Button
-                    variant={location.pathname === path ? 'secondary' : 'ghost'}
-                    size="sm"
-                    className="h-7 w-7 p-0"
-                  >
-                    <Icon className="h-4 w-4" />
-                  </Button>
-                </NavLink>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" className="text-xs">
-                {label}
-              </TooltipContent>
-            </Tooltip>
-          ))}
+          {/* Logout */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleLogout}
+            className="gap-1.5 h-8 text-xs text-destructive hover:text-destructive"
+          >
+            <LogOut className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Salir</span>
+          </Button>
+        </div>
+      </div>
 
-          <div className="w-px h-5 bg-border mx-1" />
-
-          <Tooltip>
-            <TooltipTrigger asChild>
+      {/* Mobile navigation */}
+      <div className="md:hidden border-t border-border">
+        <nav className="flex items-center justify-around py-1">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = location.pathname === item.path;
+            return (
               <Button
-                variant="ghost"
+                key={item.path}
+                variant={isActive ? 'secondary' : 'ghost'}
                 size="sm"
-                onClick={toggleTheme}
-                className="h-7 w-7 p-0"
+                onClick={() => navigate(item.path)}
+                className="flex-col h-auto py-1 gap-0.5"
               >
-                {theme === 'dark' ? (
-                  <Sun className="h-4 w-4" />
-                ) : (
-                  <Moon className="h-4 w-4" />
-                )}
+                <Icon className="h-4 w-4" />
+                <span className="text-[10px]">{item.label}</span>
               </Button>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" className="text-xs">
-              {theme === 'dark' ? 'Tema claro' : 'Tema oscuro'}
-            </TooltipContent>
-          </Tooltip>
+            );
+          })}
         </nav>
-      </header>
-    </TooltipProvider>
+      </div>
+    </header>
   );
 }

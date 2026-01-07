@@ -11,26 +11,25 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import logoSvg from '@/assets/logo.svg';
-import { supabase } from '@/integrations/supabase/client';
 
-// El número de cliente se trata como string para permitir ceros a la izquierda (ej: "00123")
 const authSchema = z.object({
-  numeroCliente: z.string().trim().min(1, { message: 'Número de cliente requerido' }).max(50),
+  email: z.string().trim().email({ message: 'Email inválido' }).max(255),
   password: z.string().min(6, { message: 'La contraseña debe tener al menos 6 caracteres' }).max(72),
 });
 
 type AuthFormData = z.infer<typeof authSchema>;
 
 export default function Auth() {
+  const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn, user, loading, isSetupComplete } = useAuth();
+  const { signIn, signUp, user, loading, isSetupComplete } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const form = useForm<AuthFormData>({
     resolver: zodResolver(authSchema),
     defaultValues: {
-      numeroCliente: '',
+      email: '',
       password: '',
     },
   });
@@ -38,60 +37,53 @@ export default function Auth() {
   // Redirect if already logged in
   useEffect(() => {
     if (!loading && user) {
-      // Siempre redirigir a Mis Datos después de login
-      navigate('/cliente');
+      if (isSetupComplete) {
+        navigate('/');
+      } else {
+        navigate('/setup');
+      }
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, isSetupComplete, navigate]);
 
   const onSubmit = async (data: AuthFormData) => {
     setIsLoading(true);
     try {
-      // Primero buscar el email asociado al número de cliente
-      const { data: profileData, error: profileError } = await supabase
-        .from('client_profiles')
-        .select('email')
-        .eq('numero_cliente', data.numeroCliente)
-        .maybeSingle();
-
-      if (profileError) {
-        toast({
-          title: 'Error',
-          description: 'Error al buscar el cliente.',
-          variant: 'destructive',
-        });
-        setIsLoading(false);
-        return;
-      }
-
-      if (!profileData) {
-        toast({
-          title: 'Cliente no encontrado',
-          description: 'El número de cliente ingresado no existe.',
-          variant: 'destructive',
-        });
-        setIsLoading(false);
-        return;
-      }
-
-      // Ahora hacer login con el email encontrado
-      const { error } = await signIn(profileData.email, data.password);
-      if (error) {
-        let errorMessage = error.message;
-        if (error.message.includes('Invalid login credentials')) {
-          errorMessage = 'Contraseña incorrecta. Verificá e intentá de nuevo.';
+      if (isLogin) {
+        const { error } = await signIn(data.email, data.password);
+        if (error) {
+          let errorMessage = error.message;
+          if (error.message.includes('Invalid login credentials')) {
+            errorMessage = 'Credenciales inválidas. Verificá tu email y contraseña.';
+          }
+          toast({
+            title: 'Error al iniciar sesión',
+            description: errorMessage,
+            variant: 'destructive',
+          });
+        } else {
+          toast({
+            title: 'Bienvenido',
+            description: 'Sesión iniciada correctamente.',
+          });
         }
-        toast({
-          title: 'Error al iniciar sesión',
-          description: errorMessage,
-          variant: 'destructive',
-        });
       } else {
-        toast({
-          title: 'Bienvenido',
-          description: 'Sesión iniciada correctamente.',
-        });
-        // Redirigir a Mis Datos
-        navigate('/cliente');
+        const { error } = await signUp(data.email, data.password);
+        if (error) {
+          let errorMessage = error.message;
+          if (error.message.includes('User already registered')) {
+            errorMessage = 'Este email ya está registrado. Intentá iniciar sesión.';
+          }
+          toast({
+            title: 'Error al registrarse',
+            description: errorMessage,
+            variant: 'destructive',
+          });
+        } else {
+          toast({
+            title: 'Cuenta creada',
+            description: 'Tu cuenta fue creada exitosamente.',
+          });
+        }
       }
     } finally {
       setIsLoading(false);
@@ -108,35 +100,38 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-sm">
-        <CardHeader className="text-center pb-4">
-          <div className="flex justify-center mb-3">
-            <img src={logoSvg} alt="Casa Fabio" className="h-14" />
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <div className="flex justify-center mb-4">
+            <img src={logoSvg} alt="Casa Fabio" className="h-16" />
           </div>
-          <CardTitle className="text-xl">Iniciar Sesión</CardTitle>
-          <CardDescription className="text-xs">
-            Ingresá tu número de cliente y contraseña
+          <CardTitle className="text-2xl">
+            {isLogin ? 'Iniciar Sesión' : 'Crear Cuenta'}
+          </CardTitle>
+          <CardDescription>
+            {isLogin
+              ? 'Ingresá tus credenciales para acceder'
+              : 'Registrate para comenzar a usar la app'}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
-                name="numeroCliente"
+                name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs">Número de Cliente</FormLabel>
+                    <FormLabel>Email</FormLabel>
                     <FormControl>
                       <Input
-                        type="text"
-                        placeholder="Ej: 00123"
-                        autoComplete="username"
-                        className="h-9"
+                        type="email"
+                        placeholder="tu@email.com"
+                        autoComplete="email"
                         {...field}
                       />
                     </FormControl>
-                    <FormMessage className="text-xs" />
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -145,26 +140,36 @@ export default function Auth() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs">Contraseña</FormLabel>
+                    <FormLabel>Contraseña</FormLabel>
                     <FormControl>
                       <Input
                         type="password"
                         placeholder="••••••••"
-                        autoComplete="current-password"
-                        className="h-9"
+                        autoComplete={isLogin ? 'current-password' : 'new-password'}
                         {...field}
                       />
                     </FormControl>
-                    <FormMessage className="text-xs" />
+                    <FormMessage />
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full h-9" disabled={isLoading}>
+              <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Ingresar
+                {isLogin ? 'Iniciar Sesión' : 'Registrarme'}
               </Button>
             </form>
           </Form>
+          <div className="mt-4 text-center">
+            <button
+              type="button"
+              onClick={() => setIsLogin(!isLogin)}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {isLogin
+                ? '¿No tenés cuenta? Registrate'
+                : '¿Ya tenés cuenta? Iniciá sesión'}
+            </button>
+          </div>
         </CardContent>
       </Card>
     </div>
