@@ -28,7 +28,7 @@ interface ProductTableProps {
 }
 
 export function ProductTable({ onFilteredProductsChange }: ProductTableProps) {
-  const { productos, productoSeleccionado, setProductoSeleccionado, mostrarCostos } = useAppStore();
+  const { productos, productoSeleccionado, setProductoSeleccionado, mostrarCostos, porcentajeGlobal } = useAppStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('Todas');
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>('Todas');
@@ -39,6 +39,7 @@ export function ProductTable({ onFilteredProductsChange }: ProductTableProps) {
   externalSetCategory = (cat: string) => {
     setSelectedCategory(cat);
     setSelectedSubcategory('Todas');
+    setSelectedMarca('Todas');
   };
   externalSetSubcategory = setSelectedSubcategory;
 
@@ -65,9 +66,16 @@ export function ProductTable({ onFilteredProductsChange }: ProductTableProps) {
   }, [productos, selectedCategory]);
 
   const marcas = useMemo(() => {
-    const marks = new Set(productos.map((p) => p.marca));
+    let filtered = productos;
+    if (selectedCategory !== 'Todas') {
+      filtered = filtered.filter(p => p.categoria === selectedCategory);
+    }
+    if (selectedSubcategory !== 'Todas') {
+      filtered = filtered.filter(p => p.subcategoria === selectedSubcategory);
+    }
+    const marks = new Set(filtered.map((p) => p.marca));
     return ['Todas', ...Array.from(marks)];
-  }, [productos]);
+  }, [productos, selectedCategory, selectedSubcategory]);
 
   // Filtrar productos
   const productosFiltrados = useMemo(() => {
@@ -136,6 +144,7 @@ export function ProductTable({ onFilteredProductsChange }: ProductTableProps) {
           <Select value={selectedCategory} onValueChange={(value) => {
             setSelectedCategory(value);
             setSelectedSubcategory('Todas');
+            setSelectedMarca('Todas');
           }}>
             <SelectTrigger className="h-7 text-xs">
               <SelectValue placeholder="Categoría" />
@@ -143,20 +152,23 @@ export function ProductTable({ onFilteredProductsChange }: ProductTableProps) {
             <SelectContent>
               {categorias.map((cat) => (
                 <SelectItem key={cat} value={cat}>
-                  {cat}
+                  {cat === 'Todas' ? 'Categoría' : cat}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
 
-          <Select value={selectedSubcategory} onValueChange={setSelectedSubcategory}>
+          <Select value={selectedSubcategory} onValueChange={(value) => {
+            setSelectedSubcategory(value);
+            setSelectedMarca('Todas');
+          }}>
             <SelectTrigger className="h-7 text-xs">
               <SelectValue placeholder="Subcategoría" />
             </SelectTrigger>
             <SelectContent>
               {subcategorias.map((sub) => (
                 <SelectItem key={sub} value={sub}>
-                  {sub}
+                  {sub === 'Todas' ? 'Subcategoría' : sub}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -169,7 +181,7 @@ export function ProductTable({ onFilteredProductsChange }: ProductTableProps) {
             <SelectContent>
               {marcas.map((marca) => (
                 <SelectItem key={marca} value={marca}>
-                  {marca}
+                  {marca === 'Todas' ? 'Marca' : marca}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -188,7 +200,7 @@ export function ProductTable({ onFilteredProductsChange }: ProductTableProps) {
             <colgroup>
               <col className="w-[100px]" />
               <col />
-              <col className="w-[80px]" />
+              <col className="w-[90px]" />
               <col className="w-[85px]" />
             </colgroup>
             <thead className="sticky top-0 bg-[hsl(var(--table-header))] text-[hsl(var(--table-header-foreground))] z-10">
@@ -220,7 +232,7 @@ export function ProductTable({ onFilteredProductsChange }: ProductTableProps) {
                       {producto.descripcion}
                     </td>
                     <td 
-                      className="px-2 py-1.5 text-muted-foreground hover:text-accent hover:underline cursor-pointer truncate"
+                      className="px-2 py-1.5 text-muted-foreground hover:text-accent hover:underline cursor-pointer whitespace-normal break-words text-[10px]"
                       onClick={(e) => {
                         e.stopPropagation();
                         setSelectedMarca(producto.marca);
@@ -230,7 +242,7 @@ export function ProductTable({ onFilteredProductsChange }: ProductTableProps) {
                       {producto.marca}
                     </td>
                     <td className="px-2 py-1.5 text-right font-medium">
-                      {formatearPrecio(mostrarCostos ? producto.precioCosto : calcularPrecioFinal(producto.precioCosto, 25))}
+                      {formatearPrecio(mostrarCostos ? producto.precioCosto : calcularPrecioFinal(producto.precioCosto, porcentajeGlobal))}
                     </td>
                   </tr>
                 );
