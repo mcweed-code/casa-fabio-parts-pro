@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Package, Minus, Plus, Trash2, Eye, EyeOff } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -7,7 +7,9 @@ import { useAppStore } from '@/store/useAppStore';
 import { formatearPrecio, calcularPrecioFinal } from '@/utils/pricing';
 import { ImageLightbox } from './ImageLightbox';
 import { setTableCategory, setTableCategoryAndSubcategory } from './ProductTable';
+
 const PORCENTAJES_DISPONIBLES = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100];
+
 export function ProductDetailPanel() {
   const {
     productoSeleccionado,
@@ -15,17 +17,24 @@ export function ProductDetailPanel() {
     agregarItemPedido,
     eliminarItemPedido,
     mostrarCostos,
-    toggleMostrarCostos
+    toggleMostrarCostos,
+    porcentajeGlobal,
+    setPorcentajeGlobal
   } = useAppStore();
   const [cantidad, setCantidad] = useState(1);
-  const [porcentaje, setPorcentaje] = useState(25);
+
+  // Sincronizar porcentaje local con el global
+  const handlePorcentajeChange = (value: string) => {
+    const newPorcentaje = parseInt(value);
+    setPorcentajeGlobal(newPorcentaje);
+  };
   const itemEnPedido = productoSeleccionado ? pedidoActual.items.find(item => item.producto.codigo === productoSeleccionado.codigo) : null;
   const precioLista = productoSeleccionado?.precioCosto || 0;
-  const precioVenta = calcularPrecioFinal(precioLista, porcentaje);
+  const precioVenta = calcularPrecioFinal(precioLista, porcentajeGlobal);
   const imagenUrl = productoSeleccionado ? productoSeleccionado.imagenUrl || `https://casafabio.com.ar/media/${productoSeleccionado.codigo}.jpg` : '';
   const handleAgregarOActualizar = () => {
     if (!productoSeleccionado) return;
-    agregarItemPedido(productoSeleccionado, cantidad, porcentaje);
+    agregarItemPedido(productoSeleccionado, cantidad, porcentajeGlobal);
   };
   const handleEliminar = () => {
     if (!productoSeleccionado) return;
@@ -80,7 +89,7 @@ export function ProductDetailPanel() {
           
           <div className="flex justify-between items-center">
             <span className="text-[10px] text-muted-foreground">
-              Venta {mostrarCostos && `(+${porcentaje}%)`}
+              Venta {mostrarCostos && `(+${porcentajeGlobal}%)`}
             </span>
             <span className="text-sm font-bold text-accent">{formatearPrecio(precioVenta)}</span>
           </div>
@@ -107,7 +116,7 @@ export function ProductDetailPanel() {
           </div>
 
           {/* Ganancia (solo si mostrarCostos) */}
-          {mostrarCostos && <Select value={porcentaje.toString()} onValueChange={v => setPorcentaje(parseInt(v))}>
+          {mostrarCostos && <Select value={porcentajeGlobal.toString()} onValueChange={handlePorcentajeChange}>
               <SelectTrigger className="h-6 w-14 text-[10px]">
                 <SelectValue />
               </SelectTrigger>

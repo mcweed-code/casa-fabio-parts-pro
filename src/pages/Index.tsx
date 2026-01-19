@@ -63,7 +63,13 @@ const Index = () => {
   const formatUltimaActualizacion = () => {
     if (!ultimaActualizacion) return '';
     const fecha = new Date(ultimaActualizacion);
-    return fecha.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+    return fecha.toLocaleDateString('es-AR', { 
+      day: '2-digit', 
+      month: '2-digit', 
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   // Mostrar loading mientras carga

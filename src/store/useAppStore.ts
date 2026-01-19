@@ -20,6 +20,10 @@ interface AppState {
   setCatalogoError: (error: string | null) => void;
   setUltimaActualizacion: (fecha: string) => void;
 
+  // Porcentaje global de ganancia
+  porcentajeGlobal: number;
+  setPorcentajeGlobal: (porcentaje: number) => void;
+
   // Pedido actual
   pedidoActual: Pedido;
   mostrarCostos: boolean;
@@ -58,6 +62,10 @@ export const useAppStore = create<AppState>()(
       pedidoActual: crearPedidoVacio(),
       pedidosGuardados: [],
       mostrarCostos: true,
+      porcentajeGlobal: 25,
+
+      // Porcentaje global
+      setPorcentajeGlobal: (porcentaje) => set({ porcentajeGlobal: porcentaje }),
 
       // Tema
       toggleTheme: () => {
@@ -231,6 +239,7 @@ export const useAppStore = create<AppState>()(
       partialize: (state) => ({
         theme: state.theme,
         pedidosGuardados: state.pedidosGuardados,
+        porcentajeGlobal: state.porcentajeGlobal,
       }),
     }
   )
