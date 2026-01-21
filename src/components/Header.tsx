@@ -1,5 +1,7 @@
-import { Moon, Sun, Download, FileText } from 'lucide-react';
+import { Moon, Sun, Download, FileText, User, Wallet, Sparkles } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { useAppStore } from '@/store/useAppStore';
 import { descargarExcelProductos } from '@/utils/exportacion';
 import { useToast } from '@/hooks/use-toast';
@@ -12,6 +14,7 @@ interface HeaderProps {
 }
 
 export function Header({ productosFiltrados, porcentajeGanancia = 25 }: HeaderProps) {
+  const navigate = useNavigate();
   const { theme, toggleTheme, productos } = useAppStore();
   const { toast } = useToast();
 
@@ -69,6 +72,64 @@ export function Header({ productosFiltrados, porcentajeGanancia = 25 }: HeaderPr
             <Download className="h-3.5 w-3.5" />
             Exportar lista
           </Button>
+
+          {/* Separador visual */}
+          <div className="w-px h-6 bg-border mx-1" />
+
+          {/* Botones de navegación estilo app */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => navigate('/perfil')}
+                className="rounded-full h-8 w-8"
+                aria-label="Perfil del cliente"
+              >
+                <User className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Perfil</p>
+            </TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => navigate('/cuenta-corriente')}
+                className="rounded-full h-8 w-8"
+                aria-label="Cuenta corriente"
+              >
+                <Wallet className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Cuenta Corriente</p>
+            </TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => navigate('/novedades')}
+                className="rounded-full h-8 w-8"
+                aria-label="Novedades"
+              >
+                <Sparkles className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Novedades</p>
+            </TooltipContent>
+          </Tooltip>
+
+          {/* Separador visual */}
+          <div className="w-px h-6 bg-border mx-1" />
           
           <Button
             variant="default"
