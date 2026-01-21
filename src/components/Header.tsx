@@ -51,39 +51,53 @@ export function Header({ productosFiltrados, porcentajeGanancia = 25 }: HeaderPr
           />
         </div>
 
-        {/* Acciones */}
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleDescargarCatalogos}
-            className="gap-1.5 h-8 text-xs"
-          >
-            <FileText className="h-3.5 w-3.5" />
-            Catálogos PDF
-          </Button>
+        {/* Acciones - Botones estilo app icon */}
+        <div className="flex items-center gap-1.5">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleDescargarCatalogos}
+                className="h-8 w-8 rounded-xl"
+                aria-label="Catálogos PDF"
+              >
+                <FileText className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Catálogos PDF</p>
+            </TooltipContent>
+          </Tooltip>
           
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleExportarExcel}
-            className="gap-1.5 h-8 text-xs"
-          >
-            <Download className="h-3.5 w-3.5" />
-            Exportar lista
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleExportarExcel}
+                className="h-8 w-8 rounded-xl"
+                aria-label="Exportar lista"
+              >
+                <Download className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Exportar lista</p>
+            </TooltipContent>
+          </Tooltip>
 
           {/* Separador visual */}
           <div className="w-px h-6 bg-border mx-1" />
 
-          {/* Botones de navegación estilo app */}
+          {/* Botones de navegación */}
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
                 variant="outline"
                 size="icon"
                 onClick={() => navigate('/perfil')}
-                className="rounded-full h-8 w-8"
+                className="h-8 w-8 rounded-xl"
                 aria-label="Perfil del cliente"
               >
                 <User className="h-4 w-4" />
@@ -100,7 +114,7 @@ export function Header({ productosFiltrados, porcentajeGanancia = 25 }: HeaderPr
                 variant="outline"
                 size="icon"
                 onClick={() => navigate('/cuenta-corriente')}
-                className="rounded-full h-8 w-8"
+                className="h-8 w-8 rounded-xl"
                 aria-label="Cuenta corriente"
               >
                 <Wallet className="h-4 w-4" />
@@ -117,7 +131,7 @@ export function Header({ productosFiltrados, porcentajeGanancia = 25 }: HeaderPr
                 variant="outline"
                 size="icon"
                 onClick={() => navigate('/novedades')}
-                className="rounded-full h-8 w-8"
+                className="h-8 w-8 rounded-xl"
                 aria-label="Novedades"
               >
                 <Sparkles className="h-4 w-4" />
@@ -131,18 +145,26 @@ export function Header({ productosFiltrados, porcentajeGanancia = 25 }: HeaderPr
           {/* Separador visual */}
           <div className="w-px h-6 bg-border mx-1" />
           
-          <Button
-            variant="default"
-            size="icon"
-            onClick={toggleTheme}
-            className="rounded-full h-9 w-9 bg-accent hover:bg-accent/80 text-accent-foreground shadow-lg border-2 border-accent-foreground/20"
-          >
-            {theme === 'dark' ? (
-              <Sun className="h-5 w-5" />
-            ) : (
-              <Moon className="h-5 w-5" />
-            )}
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="default"
+                size="icon"
+                onClick={toggleTheme}
+                className="h-8 w-8 rounded-xl bg-accent hover:bg-accent/80 text-accent-foreground shadow-sm"
+                aria-label={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+              >
+                {theme === 'dark' ? (
+                  <Sun className="h-4 w-4" />
+                ) : (
+                  <Moon className="h-4 w-4" />
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}</p>
+            </TooltipContent>
+          </Tooltip>
         </div>
       </div>
     </header>
