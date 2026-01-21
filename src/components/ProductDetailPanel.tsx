@@ -76,10 +76,6 @@ export function ProductDetailPanel() {
         <div className="p-1.5 bg-card border border-border rounded">
           <div className="flex justify-between items-center mb-1">
             <span className="text-[10px] font-semibold">Precio</span>
-            <Button variant="ghost" size="sm" onClick={toggleMostrarCostos} className="gap-0.5 text-[10px] h-5 px-1.5">
-              {mostrarCostos ? <EyeOff className="h-2.5 w-2.5" /> : <Eye className="h-2.5 w-2.5" />}
-              {mostrarCostos ? 'Ocultar' : 'Ver'}
-            </Button>
           </div>
           
           {mostrarCostos && <div className="flex justify-between items-center text-[10px]">
@@ -104,6 +100,18 @@ export function ProductDetailPanel() {
       {/* Botonera abajo - sin scroll */}
       <div className="shrink-0 p-2 border-t border-border bg-card/50">
         <div className="flex flex-wrap items-center gap-1.5">
+          {/* Botón Ocultar/Ver precios */}
+          <Button 
+            variant="outline" 
+            size="icon" 
+            className="h-6 w-6" 
+            onClick={toggleMostrarCostos}
+            title={mostrarCostos ? 'Ocultar costos' : 'Ver costos'}
+            aria-label={mostrarCostos ? 'Ocultar costos' : 'Ver costos'}
+          >
+            {mostrarCostos ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+          </Button>
+
           {/* Cantidad */}
           <div className="flex items-center gap-0.5">
             <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => setCantidad(Math.max(1, cantidad - 1))}>
@@ -128,7 +136,7 @@ export function ProductDetailPanel() {
             </Select>}
 
           {/* Botón agregar */}
-          <Button onClick={handleAgregarOActualizar} className="flex-1 bg-accent hover:bg-accent/90 text-accent-foreground h-6 text-[10px] min-w-[40px] mx-[10px]">
+          <Button onClick={handleAgregarOActualizar} className="flex-1 bg-accent hover:bg-accent/90 text-accent-foreground h-6 text-[10px] min-w-[40px]">
             {itemEnPedido ? 'Actualizar' : 'Agregar'}
           </Button>
 
