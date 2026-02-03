@@ -10,6 +10,20 @@ import { Producto } from '@/types';
 
 const ITEMS_PER_PAGE = 50;
 
+// Función auxiliar para búsqueda flexible (multi-palabra, desde 2 caracteres)
+const matchesSearch = (searchTerm: string, producto: Producto): boolean => {
+  // No filtrar si hay menos de 2 caracteres
+  if (searchTerm.length < 2) return true;
+  
+  const textoProducto = `${producto.codigo} ${producto.descripcion}`.toLowerCase();
+  
+  // Dividir búsqueda en palabras (separadas por espacios)
+  const palabras = searchTerm.toLowerCase().split(/\s+/).filter(p => p.length > 0);
+  
+  // Todas las palabras deben estar presentes
+  return palabras.every(palabra => textoProducto.includes(palabra));
+};
+
 // Exportar setters y getters para uso externo
 let externalSetCategory: ((cat: string) => void) | null = null;
 let externalSetSubcategory: ((subcat: string) => void) | null = null;
@@ -80,9 +94,7 @@ export function ProductTable({ onFilteredProductsChange }: ProductTableProps) {
   // Filtrar productos
   const productosFiltrados = useMemo(() => {
     return productos.filter((producto) => {
-      const matchSearch =
-        producto.codigo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        producto.descripcion.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchSearch = matchesSearch(searchTerm, producto);
 
       const matchCategory =
         selectedCategory === 'Todas' || producto.categoria === selectedCategory;
