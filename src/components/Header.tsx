@@ -1,4 +1,4 @@
-import { Moon, Sun, Download, FileText, User, Wallet, Sparkles } from 'lucide-react';
+import { Moon, Sun, Download, FileText, User, Wallet, Sparkles, MessageCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
@@ -139,6 +139,23 @@ export function Header({ productosFiltrados, porcentajeGanancia = 25 }: HeaderPr
             </TooltipTrigger>
             <TooltipContent>
               <p>Novedades</p>
+            </TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => navigate('/contacto')}
+                className="h-8 w-8 rounded-xl"
+                aria-label="Contacto"
+              >
+                <MessageCircle className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Contacto</p>
             </TooltipContent>
           </Tooltip>
 

@@ -113,6 +113,45 @@ export type Database = {
         }
         Relationships: []
       }
+      client_subcategory_coefficients: {
+        Row: {
+          client_id: string
+          coefficient: number
+          id: string
+          subcategory_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          client_id: string
+          coefficient?: number
+          id?: string
+          subcategory_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          client_id?: string
+          coefficient?: number
+          id?: string
+          subcategory_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_subcategory_coefficients_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_subcategory_coefficients_subcategory_id_fkey"
+            columns: ["subcategory_id"]
+            isOneToOne: false
+            referencedRelation: "subcategories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pdf_catalogs: {
         Row: {
           created_at: string | null
@@ -167,6 +206,30 @@ export type Database = {
           pdf_url?: string | null
           total?: number
           user_id?: string
+        }
+        Relationships: []
+      }
+      subcategories: {
+        Row: {
+          active: boolean | null
+          category_id: string
+          created_at: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          active?: boolean | null
+          category_id: string
+          created_at?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          active?: boolean | null
+          category_id?: string
+          created_at?: string | null
+          id?: string
+          name?: string
         }
         Relationships: []
       }

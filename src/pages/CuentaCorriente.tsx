@@ -84,143 +84,132 @@ const CuentaCorriente = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* Header */}
+    <div className="h-screen max-h-[600px] bg-background flex flex-col overflow-hidden">
+      {/* Header with summary */}
       <header className="border-b border-border bg-card sticky top-0 z-50 shadow-md shrink-0">
-        <div className="container mx-auto px-4 h-12 flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate('/')}
-            className="h-8 w-8"
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div className="flex items-center gap-2">
-            <Wallet className="h-5 w-5 text-accent" />
-            <h1 className="text-lg font-semibold">Cuenta Corriente</h1>
+        <div className="container mx-auto px-4 h-12 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate('/')}
+              className="h-8 w-8"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <div className="flex items-center gap-2">
+              <Wallet className="h-5 w-5 text-accent" />
+              <h1 className="text-lg font-semibold">Cuenta Corriente</h1>
+            </div>
+          </div>
+          {/* Inline summary */}
+          <div className="flex items-center gap-4 text-sm">
+            <div className="flex items-center gap-2">
+              <span className="text-muted-foreground">Saldo:</span>
+              <span className="font-bold">{formatCurrency(resumenCuenta.saldoActual)}</span>
+            </div>
+            <div className="hidden sm:flex items-center gap-2">
+              <span className="text-muted-foreground">Vencido:</span>
+              <span className="font-bold text-destructive">{formatCurrency(resumenCuenta.saldoVencido)}</span>
+            </div>
           </div>
         </div>
       </header>
 
       {/* Content */}
-      <main className="flex-1 container mx-auto px-4 py-6 flex flex-col gap-6 overflow-hidden">
-        {/* Bloque superior: Resumen + Movimientos */}
-        <div className="flex-1 flex flex-col min-h-0">
-          {/* Resumen */}
-          <Card className="shrink-0 mb-4">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-base">{resumenCuenta.cliente}</CardTitle>
-                  <CardDescription>Cliente Nº {resumenCuenta.numeroCliente}</CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="p-3 rounded-lg bg-muted/50">
-                  <p className="text-xs text-muted-foreground mb-1">Saldo Actual</p>
-                  <p className="text-lg font-bold">{formatCurrency(resumenCuenta.saldoActual)}</p>
-                </div>
-                <div className="p-3 rounded-lg bg-destructive/10">
-                  <p className="text-xs text-muted-foreground mb-1">Saldo Vencido</p>
-                  <p className="text-lg font-bold text-destructive">{formatCurrency(resumenCuenta.saldoVencido)}</p>
-                </div>
-                <div className="p-3 rounded-lg bg-muted/50">
-                  <p className="text-xs text-muted-foreground mb-1">Límite de Crédito</p>
-                  <p className="text-lg font-bold">{formatCurrency(resumenCuenta.limiteCredito)}</p>
-                </div>
-                <div className="p-3 rounded-lg bg-primary/10">
-                  <p className="text-xs text-muted-foreground mb-1">Disponible</p>
-                  <p className="text-lg font-bold text-primary">{formatCurrency(resumenCuenta.disponible)}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Tabla de movimientos */}
-          <Card className="flex-1 flex flex-col min-h-0">
-            <CardHeader className="pb-3 shrink-0">
-              <CardTitle className="text-base">Movimientos</CardTitle>
-              <CardDescription>Historial de comprobantes y pagos</CardDescription>
-            </CardHeader>
-            <CardContent className="flex-1 min-h-0 p-0">
-              <ScrollArea className="h-full">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[100px]">Fecha</TableHead>
-                      <TableHead className="w-[100px]">Comprobante</TableHead>
-                      <TableHead>Número</TableHead>
-                      <TableHead className="text-right w-[110px]">Débito</TableHead>
-                      <TableHead className="text-right w-[110px]">Crédito</TableHead>
-                      <TableHead className="text-right w-[110px]">Saldo</TableHead>
-                      <TableHead className="w-[100px] text-center">Estado</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {movimientos.map((mov) => (
-                      <TableRow key={mov.id}>
-                        <TableCell className="font-mono text-sm">
-                          {new Date(mov.fecha).toLocaleDateString('es-AR')}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="font-normal">
-                            {mov.comprobante}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="font-mono text-sm">{mov.numero}</TableCell>
-                        <TableCell className="text-right font-mono">
-                          {mov.debito > 0 ? formatCurrency(mov.debito) : '-'}
-                        </TableCell>
-                        <TableCell className="text-right font-mono text-primary">
-                          {mov.credito > 0 ? formatCurrency(mov.credito) : '-'}
-                        </TableCell>
-                        <TableCell className="text-right font-mono font-semibold">
-                          {formatCurrency(mov.saldo)}
-                        </TableCell>
-                        <TableCell className="text-center">
-                          {getEstadoBadge(mov.estado)}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </ScrollArea>
-            </CardContent>
-          </Card>
+      <main className="flex-1 container mx-auto px-4 py-4 flex flex-col gap-4 overflow-hidden min-h-0">
+        {/* Summary cards - compact */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 shrink-0">
+          <div className="p-2 rounded-lg bg-muted/50 border">
+            <p className="text-xs text-muted-foreground">Saldo Actual</p>
+            <p className="text-sm font-bold">{formatCurrency(resumenCuenta.saldoActual)}</p>
+          </div>
+          <div className="p-2 rounded-lg bg-destructive/10 border border-destructive/20">
+            <p className="text-xs text-muted-foreground">Saldo Vencido</p>
+            <p className="text-sm font-bold text-destructive">{formatCurrency(resumenCuenta.saldoVencido)}</p>
+          </div>
+          <div className="p-2 rounded-lg bg-muted/50 border">
+            <p className="text-xs text-muted-foreground">Límite Crédito</p>
+            <p className="text-sm font-bold">{formatCurrency(resumenCuenta.limiteCredito)}</p>
+          </div>
+          <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">
+            <p className="text-xs text-muted-foreground">Disponible</p>
+            <p className="text-sm font-bold text-primary">{formatCurrency(resumenCuenta.disponible)}</p>
+          </div>
         </div>
 
-        {/* Bloque inferior: Datos bancarios */}
+        {/* Movements table */}
+        <Card className="flex-1 flex flex-col min-h-0">
+          <CardHeader className="py-2 px-4 shrink-0">
+            <CardTitle className="text-sm">Movimientos</CardTitle>
+          </CardHeader>
+          <CardContent className="flex-1 min-h-0 p-0">
+            <ScrollArea className="h-full">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[80px] text-xs">Fecha</TableHead>
+                    <TableHead className="w-[70px] text-xs">Tipo</TableHead>
+                    <TableHead className="text-xs">Número</TableHead>
+                    <TableHead className="text-right w-[90px] text-xs">Débito</TableHead>
+                    <TableHead className="text-right w-[90px] text-xs">Crédito</TableHead>
+                    <TableHead className="text-right w-[90px] text-xs">Saldo</TableHead>
+                    <TableHead className="w-[80px] text-center text-xs">Estado</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {movimientos.map((mov) => (
+                    <TableRow key={mov.id} className="text-xs">
+                      <TableCell className="font-mono py-2">
+                        {new Date(mov.fecha).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' })}
+                      </TableCell>
+                      <TableCell className="py-2">
+                        <Badge variant="outline" className="font-normal text-xs px-1.5 py-0">
+                          {mov.comprobante}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="font-mono py-2">{mov.numero}</TableCell>
+                      <TableCell className="text-right font-mono py-2">
+                        {mov.debito > 0 ? formatCurrency(mov.debito) : '-'}
+                      </TableCell>
+                      <TableCell className="text-right font-mono text-primary py-2">
+                        {mov.credito > 0 ? formatCurrency(mov.credito) : '-'}
+                      </TableCell>
+                      <TableCell className="text-right font-mono font-semibold py-2">
+                        {formatCurrency(mov.saldo)}
+                      </TableCell>
+                      <TableCell className="text-center py-2">
+                        {getEstadoBadge(mov.estado)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </ScrollArea>
+          </CardContent>
+        </Card>
+
+        {/* Bank data - compact */}
         <div className="shrink-0">
-          <h2 className="text-sm font-semibold mb-3 flex items-center gap-2">
-            <Building2 className="h-4 w-4 text-accent" />
+          <h2 className="text-xs font-semibold mb-2 flex items-center gap-2">
+            <Building2 className="h-3.5 w-3.5 text-accent" />
             Datos Bancarios para Depósitos
           </h2>
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-2 gap-2">
             {datosBancarios.map((cuenta) => (
               <Card key={cuenta.id} className="bg-muted/30">
-                <CardContent className="p-4">
-                  <div className="flex items-start gap-3">
-                    <div className="p-2 rounded-lg bg-accent/10">
-                      <CreditCard className="h-5 w-5 text-accent" />
+                <CardContent className="p-3">
+                  <div className="flex items-start gap-2">
+                    <div className="p-1.5 rounded bg-accent/10">
+                      <CreditCard className="h-4 w-4 text-accent" />
                     </div>
-                    <div className="flex-1 space-y-2 text-sm">
+                    <div className="flex-1 space-y-1 text-xs">
                       <div className="font-semibold">{cuenta.banco}</div>
-                      <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-muted-foreground">
-                        <span>Titular:</span>
-                        <span className="text-foreground">{cuenta.titular}</span>
-                        <span>CUIT:</span>
-                        <span className="text-foreground font-mono">{cuenta.cuit}</span>
+                      <div className="grid grid-cols-2 gap-x-2 text-muted-foreground">
                         <span>CBU:</span>
-                        <span className="text-foreground font-mono text-xs">{cuenta.cbu}</span>
+                        <span className="text-foreground font-mono truncate">{cuenta.cbu}</span>
                         <span>Alias:</span>
                         <span className="text-foreground font-mono">{cuenta.alias}</span>
-                        <span>Nº Cuenta:</span>
-                        <span className="text-foreground font-mono">{cuenta.numeroCuenta}</span>
-                        <span>Sucursal:</span>
-                        <span className="text-foreground">{cuenta.sucursal}</span>
                       </div>
                     </div>
                   </div>
